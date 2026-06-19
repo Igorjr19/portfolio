@@ -4,7 +4,7 @@ A modern, terminal-themed personal portfolio website showcasing my journey as a 
 
 ## 🌐 Live Demo
 
-Visit the live website: [igorjr19.github.io/home](https://igorjr19.github.io/home)
+Visit the live website: [https://igorj.dev.br](https://igorj.dev.br)
 
 ## ✨ Features
 
