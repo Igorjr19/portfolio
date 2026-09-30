@@ -1,0 +1,12 @@
+---
+import Rota from '../components/Rota.astro';
+import { todasAsRotas, type Pagina } from '../lib/rotas';
+
+// A página inicial em português fica em index.astro.
+export async function getStaticPaths() {
+  return (await todasAsRotas()).filter((r) => r.params.caminho !== undefined);
+}
+
+const pagina = Astro.props as Pagina;
+---
+<Rota {...pagina} />

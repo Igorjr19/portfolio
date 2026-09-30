@@ -1,0 +1,48 @@
+---
+// Página de um projeto, pesquisa ou post.
+import { render } from 'astro:content';
+import { t, type Idioma, type Chave } from '../../i18n';
+import { itens } from '../../lib/conteudo';
+import type { Colecao } from '../../lib/rotas';
+import * as formatar from '../../lib/formatar';
+
+interface Props { idioma: Idioma; colecao: Colecao; pasta: string }
+const { idioma, colecao, pasta } = Astro.props;
+
+const item = (await itens(colecao, idioma)).find((i) => i.pasta === pasta)!;
+const d = item.entrada.data as Record<string, any>;
+const { Content } = await render(item.entrada);
+const lang = item.traduzido ? undefined : item.idioma === 'pt' ? 'pt-BR' : 'en';
+---
+<article lang={lang}>
+  <h1>{d.titulo}</h1>
+  {!item.traduzido && <p class="aviso" lang={idioma === 'pt' ? 'pt-BR' : 'en'}>{t('idioma.aviso-sem-traducao', idioma)}</p>}
+
+  <dl class="meta meta-lista">
+    {colecao === 'posts' && (
+      <>
+        <dt>{t('post.publicado', idioma)}</dt><dd><time datetime={d.data.toISOString()}>{formatar.data(d.data, idioma)}</time></dd>
+        {d.atualizado && <><dt>{t('post.atualizado', idioma)}</dt><dd><time datetime={d.atualizado.toISOString()}>{formatar.data(d.atualizado, idioma)}</time></dd></>}
+        {d.tags.length > 0 && <><dt>{t('post.tags', idioma)}</dt><dd>{d.tags.join(', ')}</dd></>}
+      </>
+    )}
+    {colecao === 'projetos' && (
+      <>
+        <dt>{t('item.status', idioma)}</dt><dd>{t(`status.${d.status}` as Chave, idioma)}</dd>
+        <dt>{t('item.periodo', idioma)}</dt><dd>{formatar.periodo(d.periodo.inicio, d.periodo.fim, t('item.atual', idioma), idioma)}</dd>
+        {d.stack.length > 0 && <><dt>{t('item.stack', idioma)}</dt><dd>{d.stack.join(', ')}</dd></>}
+        {d.links.repositorio && <><dt>{t('item.repositorio', idioma)}</dt><dd><a href={d.links.repositorio}>{d.links.repositorio}</a></dd></>}
+        {d.links.demo && <><dt>{t('item.demo', idioma)}</dt><dd><a href={d.links.demo}>{d.links.demo}</a></dd></>}
+      </>
+    )}
+    {colecao === 'pesquisa' && (
+      <>
+        <dt>{t('pesquisa.autores', idioma)}</dt><dd>{d.autores.join(', ')}</dd>
+        <dt>{t('pesquisa.local', idioma)}</dt><dd>{d.local} · {d.ano}</dd>
+        {d.doi && <><dt>DOI</dt><dd><a href={`https://doi.org/${d.doi}`}>{d.doi}</a></dd></>}
+      </>
+    )}
+  </dl>
+
+  <Content />
+</article>

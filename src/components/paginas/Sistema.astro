@@ -1,0 +1,25 @@
+---
+// Propriedades do sistema, versão simples: dados reais do build.
+// No Cloudflare Pages, commit e branch vêm das variáveis do build; localmente, do git.
+import { execSync } from 'node:child_process';
+import { t, type Idioma } from '../../i18n';
+import * as formatar from '../../lib/formatar';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+
+const git = (args: string) => {
+  try { return execSync(`git ${args}`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; }
+};
+const desconhecido = t('sistema.desconhecido', idioma);
+const commit = (process.env.CF_PAGES_COMMIT_SHA ?? git('rev-parse HEAD')).slice(0, 7) || desconhecido;
+const branch = process.env.CF_PAGES_BRANCH ?? (git('rev-parse --abbrev-ref HEAD') || desconhecido);
+const build = new Date();
+---
+<h1>{t('secao.sistema', idioma)}</h1>
+<dl class="meta-lista">
+  <dt>{t('sistema.commit', idioma)}</dt><dd><code>{commit}</code></dd>
+  <dt>{t('sistema.branch', idioma)}</dt><dd><code>{branch}</code></dd>
+  <dt>{t('sistema.build', idioma)}</dt><dd><time datetime={build.toISOString()}>{formatar.data(build, idioma)}</time></dd>
+</dl>
+<p>{t('sistema.pipeline', idioma)}</p>

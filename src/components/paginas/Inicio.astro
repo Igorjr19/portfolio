@@ -1,0 +1,28 @@
+---
+// Página inicial sem casca: apresentação vinda da conversa, seções e projetos em destaque.
+import { t, rota, secoes, type Idioma, type Secao } from '../../i18n';
+import { dadoPorIdioma, itens } from '../../lib/conteudo';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+
+const { entrada: conversa } = await dadoPorIdioma('conversa', idioma);
+const apresentacao = conversa.data.nos[conversa.data.inicio].mensagens;
+const destaques = (await itens('projetos', idioma)).filter((p) => p.entrada.data.destaque);
+---
+<h1>{t('sistema.nome', idioma)}</h1>
+{apresentacao.map((m) => <p>{m}</p>)}
+
+<h2>{t('pagina.navegacao', idioma)}</h2>
+<ul>
+  {(Object.keys(secoes) as Secao[]).map((s) => <li><a href={rota(idioma, s)}>{t(`secao.${s}`, idioma)}</a></li>)}
+</ul>
+
+{destaques.length > 0 && (
+  <>
+    <h2>{t('secao.projetos', idioma)}</h2>
+    <ul>
+      {destaques.map((p) => <li><a href={rota(idioma, 'projetos', p.slug)}>{p.entrada.data.titulo}</a> — {p.entrada.data.resumo}</li>)}
+    </ul>
+  </>
+)}

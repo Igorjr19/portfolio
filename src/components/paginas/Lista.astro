@@ -1,0 +1,44 @@
+---
+// Lista de projetos, pesquisa ou posts.
+import { t, rota, type Idioma, type Chave } from '../../i18n';
+import { itens } from '../../lib/conteudo';
+import { secaoDaColecao, type Colecao } from '../../lib/rotas';
+import * as formatar from '../../lib/formatar';
+
+interface Props { idioma: Idioma; colecao: Colecao }
+const { idioma, colecao } = Astro.props;
+const secao = secaoDaColecao[colecao];
+
+const lista = await itens(colecao, idioma);
+const chaveOrdem = (i: (typeof lista)[number]) => {
+  const d = i.entrada.data as Record<string, any>;
+  if (colecao === 'posts') return d.data.toISOString();
+  if (colecao === 'pesquisa') return String(d.ano);
+  return `${d.destaque ? 1 : 0}${d.periodo.inicio}`;
+};
+lista.sort((a, b) => chaveOrdem(b).localeCompare(chaveOrdem(a)));
+---
+<h1>{t(`secao.${secao}`, idioma)}</h1>
+{lista.length === 0 ? <p>{t('item.nenhum', idioma)}</p> : (
+  <ul class="lista">
+    {lista.map((i) => {
+      const d = i.entrada.data as Record<string, any>;
+      return (
+        <li lang={i.traduzido ? undefined : (i.idioma === 'pt' ? 'pt-BR' : 'en')}>
+          <h2><a href={rota(idioma, secao, i.slug)}>{d.titulo}</a></h2>
+          <p class="meta">
+            {colecao === 'posts' && <time datetime={d.data.toISOString()}>{formatar.data(d.data, idioma)}</time>}
+            {colecao === 'projetos' && (
+              <>
+                <span class="etiqueta">{t(`status.${d.status}` as Chave, idioma)}</span>
+                {formatar.periodo(d.periodo.inicio, d.periodo.fim, t('item.atual', idioma), idioma)}
+              </>
+            )}
+            {colecao === 'pesquisa' && <>{t(`pesquisa.tipo.${d.tipo}` as Chave, idioma)} · {d.ano}</>}
+          </p>
+          {d.resumo && <p>{d.resumo}</p>}
+        </li>
+      );
+    })}
+  </ul>
+)}

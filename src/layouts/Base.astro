@@ -1,0 +1,85 @@
+---
+// Toda rota é uma página HTML completa, legível sem JavaScript.
+// Com JavaScript e sem a preferência "versão simples", a casca aparece por cima.
+import '../styles/base.css';
+import '../styles/pagina.css';
+// Fontes de terceiros, quando presentes (gerado por scripts/fontes.mjs).
+import.meta.glob('../estilos-gerados/*.css', { eager: true });
+import Casca from '../components/Casca.astro';
+import { cssDosTemas } from '../lib/temas';
+import { t, rota, secoes, type Idioma, type Secao } from '../i18n';
+
+interface Props {
+  idioma: Idioma;
+  titulo?: string;
+  descricao?: string;
+  secao?: Secao;
+  // Endereço desta página em cada idioma, para o seletor de idioma e o hreflang.
+  alternativas?: Partial<Record<Idioma, string>>;
+}
+const { idioma, titulo, descricao, secao, alternativas = {} } = Astro.props;
+
+const nomeSistema = t('sistema.nome', idioma);
+const tituloPagina = titulo ? `${titulo} · ${nomeSistema}` : nomeSistema;
+const outro: Idioma = idioma === 'pt' ? 'en' : 'pt';
+const linkOutro = alternativas[outro] ?? rota(outro, secao);
+const lang = (i: Idioma) => (i === 'pt' ? 'pt-BR' : 'en');
+const css = cssDosTemas();
+const itensNav = (Object.keys(secoes) as Secao[]).map((s) => ({ secao: s, href: rota(idioma, s), rotulo: t(`secao.${s}`, idioma) }));
+---
+<!doctype html>
+<html lang={lang(idioma)}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>{tituloPagina}</title>
+    {descricao && <meta name="description" content={descricao} />}
+    {Object.entries(alternativas).map(([i, href]) => (
+      <link rel="alternate" hreflang={lang(i as Idioma)} href={href} />
+    ))}
+    <style set:html={css}></style>
+    <script is:inline>
+      // Antes de desenhar: liga a casca (se não for a versão simples) e aplica escolhas salvas,
+      // para não piscar o tema errado.
+      try {
+        const raiz = document.documentElement;
+        const url = new URLSearchParams(location.search);
+        const salvo = (k) => localStorage.getItem('igorj.' + k);
+        if (url.has('simples')) localStorage.setItem('igorj.simples', url.get('simples') === '0' ? '0' : '1');
+        if (salvo('simples') !== '1') raiz.dataset.casca = '';
+        const tema = url.get('tema') ?? salvo('tema');
+        if (tema && tema !== 'automatico') raiz.dataset.tema = tema;
+        const gradiente = url.get('gradiente') ?? salvo('gradiente');
+        if (gradiente) raiz.dataset.gradiente = gradiente;
+        const escala = salvo('escala');
+        if (escala && escala !== 'auto') raiz.style.setProperty('--escala', escala);
+      } catch {
+        document.documentElement.dataset.casca = '';
+      }
+    </script>
+  </head>
+  <body>
+    <div class="pagina">
+      <a class="pular" href="#conteudo">{t('pagina.pular-conteudo', idioma)}</a>
+      <header class="pagina-topo">
+        <a class="pagina-nome" href={rota(idioma)}>{nomeSistema}</a>
+        <nav aria-label={t('pagina.navegacao', idioma)}>
+          <ul>
+            {itensNav.map((i) => (
+              <li><a href={i.href} aria-current={i.secao === secao ? 'page' : undefined}>{i.rotulo}</a></li>
+            ))}
+          </ul>
+        </nav>
+        <a class="pagina-idioma" href={linkOutro} hreflang={lang(outro)} lang={lang(outro)}>{t('pagina.outro-idioma', idioma)}</a>
+      </header>
+      <main id="conteudo" class="pagina-conteudo">
+        <slot />
+      </main>
+      <footer class="pagina-rodape">
+        <a href="?simples=0">{t('pagina.versao-janelas', idioma)}</a>
+      </footer>
+    </div>
+    <Casca idioma={idioma} />
+  </body>
+</html>

@@ -1,0 +1,89 @@
+/* Escala.
+   --grade: tamanho da grade de arte, em pixels de arte.
+   --escala: quantos pixels CSS ocupa um pixel de arte.
+   --px: tamanho final de um pixel de arte. Sem JavaScript, vale a escala.
+   Com a correção de densidade ligada, o script arredonda --px para um número
+   inteiro de pixels do aparelho. */
+:root {
+  --grade: 16;
+  --escala: 2;
+  --px: calc(var(--escala) * 1px);
+  /* Fontes do sistema. Fontes de terceiros, quando presentes, redefinem estas
+     variáveis em src/estilos-gerados/fontes.css. */
+  --fonte-ui: monospace;
+  --fonte-ui-mono: monospace;
+  --fonte-leitura: sans-serif;
+  --fonte-codigo: monospace;
+  --texto-ui: calc(16 * var(--px));
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; height: 100%; }
+
+body {
+  color: var(--texto);
+  background: var(--janela-fundo);
+  font-family: var(--fonte-leitura);
+}
+
+/* Com a casca ligada, a página vira a tela do sistema. */
+:root[data-casca] body {
+  font-family: var(--fonte-ui);
+  font-size: var(--texto-ui);
+  line-height: 1;
+  background: var(--fundo-area);
+  overflow: hidden;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+:root:not([data-casca]) .sistema,
+:root:not([data-casca]) .painel-testes { display: none; }
+/* Por ora a página fica escondida sob a casca; a janela da rota atual vem depois. */
+:root[data-casca] .pagina { display: none; }
+
+button { font: inherit; color: inherit; }
+
+.ico { display: block; width: calc(var(--w) * var(--px)); height: calc(var(--h) * var(--px)); image-rendering: pixelated; }
+
+/* Foco visível com estilo do sistema. */
+:focus-visible { outline: var(--px) dotted var(--foco); outline-offset: calc(-2 * var(--px)); }
+
+/* Relevo de dois tons. */
+.relevo {
+  background: var(--botao-fundo);
+  color: var(--botao-texto);
+  border: 0;
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--relevo-claro),
+    inset calc(-1 * var(--px)) calc(-1 * var(--px)) 0 var(--relevo-escuro);
+}
+.relevo:active, .relevo[aria-pressed='true'] {
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--relevo-escuro),
+    inset calc(-1 * var(--px)) calc(-1 * var(--px)) 0 var(--relevo-claro);
+}
+
+/* Gradientes: liso por padrão; "faixas" fica como variante de teste.
+   --g-claro, --g-base, --g-escuro e --g-altura (em pixels de arte) vêm de quem usa. */
+.gradiente {
+  background: linear-gradient(to bottom, var(--g-claro), var(--g-base) 35%, var(--g-base) 65%, var(--g-escuro));
+}
+:root[data-gradiente='faixas'] .gradiente {
+  --b1: calc(2 * var(--px));
+  --b2: calc(4 * var(--px));
+  --b3: calc((var(--g-altura) - 5) * var(--px));
+  --b4: calc((var(--g-altura) - 3) * var(--px));
+  background: linear-gradient(to bottom,
+    var(--g-claro) 0 var(--b1),
+    color-mix(in srgb, var(--g-claro), var(--g-base)) var(--b1) var(--b2),
+    var(--g-base) var(--b2) var(--b3),
+    color-mix(in srgb, var(--g-base), var(--g-escuro)) var(--b3) var(--b4),
+    var(--g-escuro) var(--b4));
+}
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

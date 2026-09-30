@@ -1,0 +1,23 @@
+{
+  "name": "igorj-dev",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preparar": "node scripts/indexar-icones.mjs && node scripts/fontes.mjs",
+    "conteudo": "node scripts/obter-conteudo.mjs",
+    "verificar": "node scripts/verificar.mjs",
+    "contraste": "node scripts/contraste.mjs",
+    "dev": "npm run preparar && astro dev",
+    "build": "npm run preparar && npm run conteudo && npm run verificar && astro build",
+    "build:exemplo": "PERMITIR_EXEMPLO=1 npm run build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^7.3.5"
+  },
+  "devDependencies": {
+    "pngjs": "^7.0.0",
+    "typescript": "^7.0.2"
+  }
+}

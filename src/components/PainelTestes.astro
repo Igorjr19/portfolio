@@ -1,0 +1,35 @@
+---
+// Painel de testes, fora do sistema: compara escala, densidade, gradiente e aparelho.
+import { t, type Idioma } from '../i18n';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+---
+<details class="painel-testes">
+  <summary>{t('teste.titulo', idioma)}</summary>
+  <form class="painel-form">
+    <label>{t('teste.escala', idioma)}
+      <select data-teste="escala">
+        <option value="auto">{t('teste.modo.auto', idioma)}</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+    </label>
+    <label><input type="checkbox" data-teste="densidade" /> {t('teste.densidade', idioma)}</label>
+    <label>{t('teste.gradiente', idioma)}
+      <select data-teste="gradiente">
+        <option value="faixas">{t('teste.gradiente.faixas', idioma)}</option>
+        <option value="liso">{t('teste.gradiente.liso', idioma)}</option>
+      </select>
+    </label>
+    <label>{t('teste.modo', idioma)}
+      <select data-teste="modo">
+        <option value="auto">{t('teste.modo.auto', idioma)}</option>
+        <option value="computador">{t('teste.modo.computador', idioma)}</option>
+        <option value="celular">{t('teste.modo.celular', idioma)}</option>
+      </select>
+    </label>
+    <p class="painel-info">{t('teste.info', idioma)}: <output data-teste="dpr"></output></p>
+  </form>
+</details>

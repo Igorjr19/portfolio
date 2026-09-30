@@ -1,0 +1,71 @@
+---
+// Currículo gerado do YAML. O PDF vem depois (Documentos).
+import { t, rota, type Idioma } from '../../i18n';
+import { dadoPorIdioma, itens } from '../../lib/conteudo';
+import * as formatar from '../../lib/formatar';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+
+const { entrada, traduzido } = await dadoPorIdioma('cv', idioma);
+const cv = entrada.data;
+const atual = t('item.atual', idioma);
+const pesquisas = await itens('pesquisa', idioma);
+const publicacoes = cv.publicacoes
+  .map((p) => pesquisas.find((i) => i.pasta === p.pesquisa))
+  .filter((i): i is NonNullable<typeof i> => Boolean(i));
+---
+{!traduzido && <p class="aviso">{t('idioma.aviso-sem-traducao', idioma)}</p>}
+<h1>{cv.basico.nome}</h1>
+<p><strong>{cv.basico.cargo}</strong></p>
+<p>{cv.basico.resumo}</p>
+<p class="meta">
+  {cv.basico.local} · <a href={`mailto:${cv.basico.email}`}>{cv.basico.email}</a> · <a href={cv.basico.site}>{cv.basico.site}</a>
+  {cv.basico.perfis.map((p) => <> · <a href={p.url}>{p.rede}</a></>)}
+</p>
+
+{cv.experiencia.length > 0 && (
+  <>
+    <h2>{t('cv.experiencia', idioma)}</h2>
+    {cv.experiencia.map((x) => (
+      <section>
+        <h3>{x.cargo} — {x.empresa}</h3>
+        <p class="meta">{formatar.periodo(x.inicio, x.fim, atual, idioma)}{x.local && ` · ${x.local}`}</p>
+        {x.resumo && <p>{x.resumo}</p>}
+        {x.destaques.length > 0 && <ul>{x.destaques.map((h) => <li>{h}</li>)}</ul>}
+      </section>
+    ))}
+  </>
+)}
+
+{cv.formacao.length > 0 && (
+  <>
+    <h2>{t('cv.formacao', idioma)}</h2>
+    <ul>
+      {cv.formacao.map((f) => <li><strong>{f.curso}</strong>, {f.instituicao}{f.inicio && ` (${formatar.periodo(f.inicio, f.fim, atual, idioma)})`}</li>)}
+    </ul>
+  </>
+)}
+
+{cv.habilidades.length > 0 && (
+  <>
+    <h2>{t('cv.habilidades', idioma)}</h2>
+    <dl class="meta-lista">
+      {cv.habilidades.map((h) => <><dt>{h.area}</dt><dd>{h.itens.join(', ')}</dd></>)}
+    </dl>
+  </>
+)}
+
+{cv.idiomas.length > 0 && (
+  <>
+    <h2>{t('cv.idiomas', idioma)}</h2>
+    <ul>{cv.idiomas.map((i) => <li>{i.idioma}: {i.nivel}</li>)}</ul>
+  </>
+)}
+
+{publicacoes.length > 0 && (
+  <>
+    <h2>{t('cv.publicacoes', idioma)}</h2>
+    <ul>{publicacoes.map((p) => <li><a href={rota(idioma, 'pesquisa', p.slug)}>{p.entrada.data.titulo}</a> ({p.entrada.data.ano})</li>)}</ul>
+  </>
+)}

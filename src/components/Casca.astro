@@ -1,0 +1,122 @@
+---
+// Casca do sistema: área de trabalho, barra de tarefas, menu e celular.
+// Entra em todas as páginas e só aparece com JavaScript ligado e sem a preferência "versão simples".
+import Icone from './Icone.astro';
+import ConteudoApp from './ConteudoApp.astro';
+import PainelTestes from './PainelTestes.astro';
+import { apps } from '../lib/apps';
+import { t, type Idioma } from '../i18n';
+import '../styles/sistema.css';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+---
+<div class="sistema" data-modo="computador">
+
+  <!-- Computador -->
+  <div class="computador">
+    <div class="area" role="region" aria-label={t('sistema.area', idioma)}>
+      <ul class="icones-area">
+        {apps.filter((a) => a.atalho).map((app) => (
+          <li>
+            <button class="icone-area" data-app={app.id} type="button">
+              <Icone nome={app.icone} />
+              <span class="rotulo">{t(app.titulo, idioma)}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div class="janelas"></div>
+    </div>
+
+    <div id="menu-iniciar" class="menu-iniciar" role="menu" aria-label={t('sistema.menu', idioma)} hidden>
+      <div class="menu-topo gradiente" style="--g-claro:var(--janela-titulo-realce);--g-base:var(--janela-titulo);--g-escuro:var(--janela-titulo-sombra);--g-altura:24">
+        {t('sistema.nome', idioma)}
+      </div>
+      <ul class="menu-itens">
+        {apps.map((app) => (
+          <li role="none">
+            <button role="menuitem" type="button" data-app={app.id} tabindex="-1">
+              <Icone nome={`${app.icone}-16`} />
+              <span>{t(app.titulo, idioma)}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <footer class="barra gradiente" style="--g-claro:var(--barra-realce);--g-base:var(--barra-fundo);--g-escuro:var(--barra-sombra);--g-altura:22">
+      <button class="iniciar gradiente" type="button" aria-haspopup="menu" aria-controls="menu-iniciar" aria-expanded="false"
+        style="--g-claro:var(--iniciar-realce);--g-base:var(--iniciar-fundo);--g-escuro:var(--iniciar-sombra);--g-altura:22">
+        {t('sistema.iniciar', idioma)}
+      </button>
+      <ul class="tarefas" aria-label={t('sistema.tarefas', idioma)}></ul>
+      <div class="bandeja">
+        <time class="relogio" aria-label={t('sistema.relogio', idioma)}></time>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Celular -->
+  <div class="celular">
+    <header class="status" aria-label={t('celular.status', idioma)}>
+      <time class="relogio"></time>
+      <span class="status-direita">
+        <Icone nome="envelope" />
+        <span role="img" aria-label={t('celular.bateria', idioma)}><Icone nome="bateria" /></span>
+      </span>
+    </header>
+    <div class="tela">
+      <ul class="grade-apps" aria-label={t('celular.apps', idioma)}>
+        {apps.map((app) => (
+          <li>
+            <button class="app-celular" data-app={app.id} type="button">
+              <Icone nome={app.icone} />
+              <span class="rotulo">{t(app.titulo, idioma)}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <section class="app-aberto" hidden aria-labelledby="app-aberto-titulo">
+        <h2 id="app-aberto-titulo" class="app-aberto-titulo gradiente"
+          style="--g-claro:var(--janela-titulo-realce);--g-base:var(--janela-titulo);--g-escuro:var(--janela-titulo-sombra);--g-altura:24"></h2>
+        <div class="app-aberto-corpo"></div>
+      </section>
+    </div>
+    <nav class="nav-celular">
+      <button type="button" class="nav-voltar" aria-label={t('celular.voltar', idioma)}><Icone nome="voltar" /></button>
+      <button type="button" class="nav-inicio" aria-label={t('celular.inicio', idioma)}><Icone nome="inicio" /></button>
+    </nav>
+  </div>
+</div>
+
+<!-- Modelo de janela -->
+<template id="modelo-janela">
+  <section class="janela" role="dialog" aria-modal="false" tabindex="-1">
+    <header class="titulo gradiente" style="--g-claro:var(--janela-titulo-realce);--g-base:var(--janela-titulo);--g-escuro:var(--janela-titulo-sombra);--g-altura:20">
+      <span class="titulo-icone"></span>
+      <h2 class="titulo-texto"></h2>
+      <span class="controles">
+        <button type="button" class="relevo controle" data-acao="minimizar" aria-label={t('janela.minimizar', idioma)}><Icone nome="minimizar" /></button>
+        <button type="button" class="relevo controle" data-acao="maximizar" aria-label={t('janela.maximizar', idioma)} data-maximizar={t('janela.maximizar', idioma)} data-restaurar={t('janela.restaurar', idioma)}><Icone nome="maximizar" /></button>
+        <button type="button" class="relevo controle" data-acao="fechar" aria-label={t('janela.fechar', idioma)}><Icone nome="fechar" /></button>
+      </span>
+    </header>
+    <div class="corpo"></div>
+  </section>
+</template>
+
+{apps.map((app) => (
+  <>
+    <ConteudoApp id={app.id} idioma={idioma} />
+    <template id={`icone16-${app.id}`}><Icone nome={`${app.icone}-16`} /></template>
+  </>
+))}
+
+<PainelTestes idioma={idioma} />
+
+<script>
+  import { iniciar } from '../scripts/sistema';
+  // A casca só liga quando o visitante não pediu a versão simples.
+  if ('casca' in document.documentElement.dataset) iniciar();
+</script>

@@ -1,0 +1,59 @@
+---
+// Conversa do Sobre mim como texto corrido: a mesma do Mensageiro, na ordem do menu.
+import { t, type Idioma } from '../../i18n';
+import { dadoPorIdioma } from '../../lib/conteudo';
+import { resolverAbre } from '../../lib/rotas';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+
+const { entrada, traduzido } = await dadoPorIdioma('conversa', idioma);
+const { atalhos, inicio, nos } = entrada.data;
+
+// Segue "proximo" a partir de um nó e junta as mensagens até chegar a um nó com opções.
+function sequencia(id: string, visitados = new Set<string>()) {
+  const mensagens: string[] = [];
+  let atual: string | undefined = id;
+  while (atual && !visitados.has(atual)) {
+    visitados.add(atual);
+    const no = nos[atual];
+    mensagens.push(...no.mensagens);
+    if (no.opcoes) return { mensagens, parada: atual };
+    atual = no.proximo;
+  }
+  return { mensagens, parada: atual };
+}
+
+const abertura = sequencia(inicio);
+const menu = abertura.parada ? nos[abertura.parada] : undefined;
+// Opções que abrem um app no fim de uma resposta viram links logo abaixo dela.
+const linksDoNo = (id?: string) => (id && id !== abertura.parada ? nos[id]?.opcoes ?? [] : [])
+  .filter((o) => o.abre)
+  .map((o) => ({ texto: o.texto, href: resolverAbre(o.abre!, idioma) }));
+const respostas = (menu?.opcoes ?? []).map((o) => {
+  if (!o.vai_para) return { pergunta: o.texto, mensagens: [], link: resolverAbre(o.abre!, idioma), links: [] };
+  const r = sequencia(o.vai_para, new Set([abertura.parada!]));
+  return { pergunta: o.texto, mensagens: r.mensagens, link: undefined, links: linksDoNo(r.parada) };
+});
+---
+<h1>{t('secao.sobre', idioma)}</h1>
+{!traduzido && <p class="aviso">{t('idioma.aviso-sem-traducao', idioma)}</p>}
+
+{abertura.mensagens.map((m) => <p>{m}</p>)}
+
+<dl class="conversa">
+  {respostas.map((r) => (
+    <>
+      <dt>{r.link ? <a href={r.link}>{r.pergunta}</a> : r.pergunta}</dt>
+      {r.mensagens.map((m) => <dd>{m}</dd>)}
+      {r.links.map((l) => <dd><a href={l.href}>{l.texto}</a></dd>)}
+    </>
+  ))}
+</dl>
+
+{atalhos.length > 0 && (
+  <>
+    <h2>{t('sobre.atalhos', idioma)}</h2>
+    <ul>{atalhos.map((a) => <li><a href={resolverAbre(a.abre, idioma)}>{a.texto}</a></li>)}</ul>
+  </>
+)}

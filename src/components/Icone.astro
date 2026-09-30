@@ -1,0 +1,13 @@
+---
+// Ícone indexado, embutido no HTML para que as cores sigam os tokens do tema.
+interface Props { nome: string }
+const { nome } = Astro.props;
+
+const arquivos = import.meta.glob<string>('../icones/gerados/*.svg', { query: '?raw', import: 'default', eager: true });
+const svg = arquivos[`../icones/gerados/${nome}.svg`];
+if (!svg) throw new Error(`Ícone não encontrado: ${nome}`);
+
+const [, , largura, altura] = svg.match(/viewBox="([\d ]+)"/)![1].split(' ');
+const html = svg.replace('class="ico"', `class="ico" style="--w:${largura};--h:${altura}"`);
+---
+<Fragment set:html={html} />

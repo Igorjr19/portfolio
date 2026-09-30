@@ -1,0 +1,66 @@
+/* Versão sem casca: página comum, legível, com as cores do tema. */
+
+.pagina {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.pular { position: absolute; left: -9999px; }
+.pular:focus { left: 1rem; top: 1rem; background: var(--destaque); color: var(--destaque-texto); padding: 0.25rem 0.5rem; z-index: 1; }
+
+.pagina a { color: var(--destaque); }
+.pagina :focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+
+.pagina-topo {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--barra-fundo); color: var(--barra-texto);
+}
+.pagina-topo a { color: var(--barra-texto); }
+.pagina-nome { font-weight: 700; text-decoration: none; }
+.pagina-topo nav ul { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; list-style: none; margin: 0; padding: 0; }
+.pagina-topo a[aria-current='page'] { text-decoration-thickness: 2px; }
+.pagina-idioma { margin-left: auto; }
+
+.pagina-conteudo { flex: 1; width: 100%; max-width: 44rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+.pagina-conteudo h1 { line-height: 1.25; margin: 0 0 0.5rem; }
+.pagina-conteudo h2 { line-height: 1.3; margin: 2rem 0 0.5rem; }
+.pagina-conteudo img { max-width: 100%; height: auto; image-rendering: pixelated; }
+.pagina-conteudo pre { font-family: var(--fonte-codigo); font-size: 0.875rem; background: var(--botao-fundo); padding: 0.75rem; overflow-x: auto; }
+.pagina-conteudo code { font-family: var(--fonte-codigo); font-size: 0.9em; }
+.pagina-conteudo blockquote { margin: 1rem 0; padding-left: 1rem; border-left: 4px solid var(--janela-borda); color: var(--texto-suave); }
+
+/* Realce de código ligado aos tokens do tema. */
+.pagina {
+  --astro-code-foreground: var(--texto);
+  --astro-code-background: var(--botao-fundo);
+  --astro-code-token-comment: var(--texto-suave);
+  --astro-code-token-keyword: var(--destaque);
+  --astro-code-token-string: var(--sucesso);
+  --astro-code-token-string-expression: var(--sucesso);
+  --astro-code-token-constant: var(--aviso);
+  --astro-code-token-function: var(--destaque);
+  --astro-code-token-parameter: var(--texto);
+  --astro-code-token-punctuation: var(--texto-suave);
+  --astro-code-token-link: var(--destaque);
+}
+
+.meta { color: var(--texto-suave); font-size: 0.9rem; margin: 0 0 1.5rem; }
+.meta dt { font-weight: 700; }
+.meta-lista { display: grid; grid-template-columns: max-content 1fr; gap: 0.25rem 1rem; }
+.meta-lista dd { margin: 0; }
+
+.aviso { border: 1px solid var(--aviso); padding: 0.5rem 0.75rem; margin: 0 0 1.5rem; }
+
+.lista { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.25rem; }
+.lista h2, .lista h3 { margin: 0; font-size: 1.1rem; }
+.lista p { margin: 0.25rem 0 0; }
+.etiqueta { display: inline-block; font-size: 0.8rem; padding: 0 0.4rem; border: 1px solid var(--texto-suave); color: var(--texto-suave); margin-right: 0.25rem; }
+
+.conversa dt { font-weight: 700; margin-top: 1rem; }
+.conversa dd { margin: 0.25rem 0 0; }
+
+.pagina-rodape { padding: 1rem; text-align: center; font-size: 0.9rem; color: var(--texto-suave); }

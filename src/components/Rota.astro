@@ -1,0 +1,41 @@
+---
+// Monta a página de uma rota: layout + conteúdo do tipo certo.
+import Base from '../layouts/Base.astro';
+import Inicio from './paginas/Inicio.astro';
+import Sobre from './paginas/Sobre.astro';
+import Lista from './paginas/Lista.astro';
+import Item from './paginas/Item.astro';
+import Curriculo from './paginas/Curriculo.astro';
+import Contato from './paginas/Contato.astro';
+import Sistema from './paginas/Sistema.astro';
+import { t } from '../i18n';
+import { itens } from '../lib/conteudo';
+import { secaoDaColecao, type Pagina, type Colecao } from '../lib/rotas';
+
+type Props = Pagina;
+const pagina = Astro.props;
+const { idioma, alternativas } = pagina;
+
+const colecaoDaSecao = Object.fromEntries(Object.entries(secaoDaColecao).map(([c, s]) => [s, c])) as Record<string, Colecao>;
+
+let titulo: string | undefined;
+let descricao: string | undefined;
+let secao = pagina.tipo === 'secao' ? pagina.secao : pagina.tipo === 'item' ? secaoDaColecao[pagina.colecao] : undefined;
+if (pagina.tipo === 'secao') titulo = t(`secao.${pagina.secao}`, idioma);
+if (pagina.tipo === 'item') {
+  const item = (await itens(pagina.colecao, idioma)).find((i) => i.pasta === pagina.pasta)!;
+  titulo = item.entrada.data.titulo;
+  descricao = 'resumo' in item.entrada.data ? item.entrada.data.resumo : undefined;
+}
+---
+<Base idioma={idioma} titulo={titulo} descricao={descricao} secao={secao} alternativas={alternativas}>
+  {pagina.tipo === 'inicio' && <Inicio idioma={idioma} />}
+  {pagina.tipo === 'item' && <Item idioma={idioma} colecao={pagina.colecao} pasta={pagina.pasta} />}
+  {pagina.tipo === 'secao' && (
+    pagina.secao === 'sobre' ? <Sobre idioma={idioma} /> :
+    pagina.secao === 'cv' ? <Curriculo idioma={idioma} /> :
+    pagina.secao === 'contato' ? <Contato idioma={idioma} /> :
+    pagina.secao === 'sistema' ? <Sistema idioma={idioma} /> :
+    <Lista idioma={idioma} colecao={colecaoDaSecao[pagina.secao]} />
+  )}
+</Base>

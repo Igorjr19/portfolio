@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+conteudo/
+src/icones/gerados/
+src/temas/gerado/
+terceiros/
+public/fontes/
+src/estilos-gerados/

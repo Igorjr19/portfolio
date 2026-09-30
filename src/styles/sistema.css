@@ -1,0 +1,187 @@
+/* Casca do sistema. Medidas em pixels de arte (múltiplos de --px), cores só por token. */
+
+.sistema { position: fixed; inset: 0; }
+.sistema[data-modo='computador'] .celular,
+.sistema[data-modo='celular'] .computador { display: none; }
+
+/* ---------- Computador ---------- */
+
+.computador { position: absolute; inset: 0; display: flex; flex-direction: column; }
+
+.area { position: relative; flex: 1; overflow: hidden; background: var(--fundo-area); }
+
+.icones-area {
+  list-style: none; margin: 0; padding: calc(8 * var(--px));
+  display: grid; grid-auto-flow: column; grid-template-rows: repeat(auto-fill, calc(56 * var(--px)));
+  gap: calc(4 * var(--px)); height: 100%; justify-content: start;
+}
+.icone-area {
+  width: calc(64 * var(--px)); padding: calc(2 * var(--px)) 0; background: none; border: 0; cursor: default;
+  display: flex; flex-direction: column; align-items: center; gap: calc(3 * var(--px));
+}
+.icone-area .rotulo {
+  color: var(--rotulo-icone-texto);
+  text-shadow: var(--px) var(--px) 0 var(--rotulo-icone-sombra);
+  padding: 0 calc(2 * var(--px)); line-height: calc(10 * var(--px));
+}
+.icone-area[aria-selected='true'] .rotulo { background: var(--destaque); color: var(--destaque-texto); text-shadow: none; }
+.icone-area[aria-selected='true'] .ico { filter: brightness(0.8); }
+
+/* Janela */
+.janela {
+  position: absolute; display: flex; flex-direction: column;
+  width: calc(260 * var(--px)); max-width: calc(100% - 8 * var(--px));
+  max-height: calc(100% - 8 * var(--px));
+  background: var(--janela-fundo); color: var(--texto);
+  border: var(--px) solid var(--janela-borda);
+}
+.janela[hidden] { display: none; }
+.janela.maximizada { inset: 0 !important; width: auto; max-width: none; max-height: none; }
+.janela:focus { outline: none; }
+
+.titulo {
+  display: flex; align-items: center; gap: calc(3 * var(--px));
+  height: calc(20 * var(--px)); padding: 0 calc(2 * var(--px)) 0 calc(3 * var(--px));
+  color: var(--janela-titulo-texto); cursor: default; user-select: none; touch-action: none;
+}
+.janela:not(.ativa) .titulo {
+  --g-claro: var(--janela-titulo-inativa) !important;
+  --g-base: var(--janela-titulo-inativa) !important;
+  --g-escuro: var(--janela-titulo-inativa) !important;
+  color: var(--janela-titulo-inativa-texto);
+}
+.titulo-texto { flex: 1; margin: 0; font-size: inherit; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.controles { display: flex; gap: calc(2 * var(--px)); }
+.controle {
+  width: calc(14 * var(--px)); height: calc(14 * var(--px)); padding: 0;
+  display: grid; place-items: center; cursor: default;
+}
+
+.corpo {
+  flex: 1; overflow: auto; margin: calc(2 * var(--px)); padding: calc(6 * var(--px));
+  box-shadow:
+    inset var(--px) var(--px) 0 var(--relevo-escuro),
+    inset calc(-1 * var(--px)) calc(-1 * var(--px)) 0 var(--relevo-claro);
+  line-height: 1.125;
+}
+
+/* Barra de tarefas */
+.barra {
+  display: flex; align-items: stretch; gap: calc(4 * var(--px));
+  height: calc(22 * var(--px)); color: var(--barra-texto); position: relative; z-index: 2;
+}
+.iniciar {
+  border: 0; padding: 0 calc(10 * var(--px)) 0 calc(8 * var(--px));
+  color: var(--iniciar-texto); font-weight: 700; cursor: default;
+  border-radius: 0 calc(6 * var(--px)) calc(6 * var(--px)) 0;
+}
+.tarefas { list-style: none; margin: 0; padding: calc(2 * var(--px)) 0; display: flex; gap: calc(2 * var(--px)); flex: 1; min-width: 0; }
+.tarefa {
+  display: flex; align-items: center; gap: calc(3 * var(--px));
+  width: calc(96 * var(--px)); height: 100%; padding: 0 calc(4 * var(--px));
+  background: var(--barra-botao); color: var(--barra-texto); border: 0; cursor: default;
+  box-shadow: inset var(--px) var(--px) 0 var(--barra-realce), inset calc(-1 * var(--px)) calc(-1 * var(--px)) 0 var(--barra-sombra);
+  white-space: nowrap; overflow: hidden;
+}
+.tarefa[aria-pressed='true'] {
+  background: var(--barra-botao-ativo);
+  box-shadow: inset var(--px) var(--px) 0 var(--barra-sombra), inset calc(-1 * var(--px)) calc(-1 * var(--px)) 0 var(--barra-realce);
+}
+.tarefa span { overflow: hidden; text-overflow: ellipsis; }
+.bandeja {
+  display: flex; align-items: center; padding: 0 calc(8 * var(--px));
+  background: var(--barra-sombra);
+  box-shadow: inset var(--px) 0 0 var(--barra-realce);
+}
+
+/* Menu iniciar */
+.menu-iniciar {
+  position: absolute; left: 0; bottom: calc(22 * var(--px)); z-index: 3;
+  width: calc(160 * var(--px)); background: var(--janela-fundo); color: var(--texto);
+  border: var(--px) solid var(--janela-borda);
+}
+.menu-topo { color: var(--janela-titulo-texto); font-weight: 700; padding: calc(8 * var(--px)) calc(6 * var(--px)); height: calc(24 * var(--px)); }
+.menu-itens { list-style: none; margin: 0; padding: calc(3 * var(--px)); }
+.menu-itens button {
+  display: flex; align-items: center; gap: calc(4 * var(--px)); width: 100%;
+  padding: calc(3 * var(--px)); background: none; border: 0; text-align: left; cursor: default;
+}
+.menu-itens button:hover, .menu-itens button:focus-visible { background: var(--destaque); color: var(--destaque-texto); outline: none; }
+
+/* ---------- Celular ---------- */
+
+.celular {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  background: var(--celular-fundo); color: var(--texto);
+}
+/* Moldura só numa tela grande; num celular de verdade a interface ocupa a tela inteira. */
+.sistema[data-moldura] { display: grid; place-items: center; background: var(--fundo-area); }
+.sistema[data-moldura] .celular {
+  position: relative; inset: auto;
+  width: calc(390 * var(--px)); height: calc(760 * var(--px));
+  max-height: calc(100vh - 32px);
+  border: calc(6 * var(--px)) solid var(--janela-borda);
+  border-radius: calc(12 * var(--px));
+  overflow: hidden;
+}
+
+.status {
+  display: flex; justify-content: space-between; align-items: center;
+  height: calc(14 * var(--px)); padding: 0 calc(4 * var(--px));
+  background: var(--celular-status-fundo); color: var(--celular-status-texto);
+}
+.status-direita { display: flex; gap: calc(3 * var(--px)); align-items: center; }
+
+.tela { flex: 1; position: relative; overflow: auto; }
+
+.grade-apps {
+  list-style: none; margin: 0; padding: calc(8 * var(--px));
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: calc(6 * var(--px));
+}
+.app-celular {
+  width: 100%; min-width: 44px; min-height: 44px; padding: calc(2 * var(--px)) 0;
+  display: flex; flex-direction: column; align-items: center; gap: calc(2 * var(--px));
+  background: none; border: 0; color: var(--rotulo-icone-texto);
+}
+.app-celular .rotulo { text-shadow: var(--px) var(--px) 0 var(--rotulo-icone-sombra); }
+
+.app-aberto { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--janela-fundo); }
+.app-aberto[hidden] { display: none; }
+.app-aberto-titulo:focus { outline: none; }
+.app-aberto-titulo { margin: 0; font-size: inherit; height: calc(24 * var(--px)); padding: calc(4 * var(--px)) calc(6 * var(--px)); color: var(--janela-titulo-texto); }
+.app-aberto-corpo { flex: 1; overflow: auto; padding: calc(6 * var(--px)); line-height: 1.125; }
+
+.nav-celular {
+  display: flex; justify-content: space-around;
+  background: var(--celular-status-fundo); color: var(--celular-status-texto);
+}
+.nav-celular button { min-width: 44px; min-height: 44px; flex: 1; display: grid; place-items: center; background: none; border: 0; }
+
+/* ---------- Conteúdo dos apps ---------- */
+
+.espaco-reservado { margin: 0; color: var(--texto-suave); }
+
+.grupo { border: 0; margin: 0 0 calc(6 * var(--px)); padding: calc(6 * var(--px));
+  box-shadow: inset var(--px) var(--px) 0 var(--relevo-escuro), inset calc(-1 * var(--px)) calc(-1 * var(--px)) 0 var(--relevo-claro); }
+.grupo { min-width: 0; }
+.grupo legend { padding: 0 calc(2 * var(--px)); }
+.grupo label { display: flex; align-items: center; gap: calc(4 * var(--px)); min-height: calc(14 * var(--px)); }
+.grupo input { accent-color: var(--destaque); width: calc(10 * var(--px)); height: calc(10 * var(--px)); margin: 0; }
+
+/* Texto de leitura: fonte comum, tamanho confortável, fora da escala de pixel. */
+.leitura { font-family: var(--fonte-leitura); font-size: 1rem; line-height: 1.6; margin: 0 0 0.75rem; -webkit-font-smoothing: auto; }
+.codigo { font-family: var(--fonte-codigo); font-size: 0.875rem; margin: 0; padding: 0.5rem; background: var(--botao-fundo); color: var(--texto); overflow-x: auto; -webkit-font-smoothing: auto; }
+.creditos { margin: 0 0 calc(4 * var(--px)); color: var(--texto-suave); }
+
+/* ---------- Painel de testes (fora do sistema) ---------- */
+
+.painel-testes {
+  position: fixed; right: 8px; bottom: 56px; z-index: 10;
+  font: 14px/1.4 var(--fonte-leitura); -webkit-font-smoothing: auto;
+  background: var(--janela-fundo); color: var(--texto); border: 1px solid var(--janela-borda); padding: 4px 8px;
+  max-width: 260px;
+}
+.painel-testes summary { cursor: pointer; }
+.painel-form { display: grid; gap: 6px; margin-top: 6px; }
+.painel-form label { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.painel-info { margin: 0; color: var(--texto-suave); }

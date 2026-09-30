@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import { t, type Idioma } from '../../i18n';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+
+const [contato] = await getCollection('contato');
+if (!contato) throw new Error('Conteúdo sem contato/contato.yaml');
+const { email, profissionais, pessoais } = contato.data;
+---
+<h1>{t('secao.contato', idioma)}</h1>
+<dl class="meta-lista">
+  <dt>{t('contato.email', idioma)}</dt>
+  <dd><a href={`mailto:${email[idioma]}`}>{email[idioma]}</a></dd>
+</dl>
+
+{profissionais.length > 0 && (
+  <>
+    <h2>{t('contato.profissionais', idioma)}</h2>
+    <ul>{profissionais.map((r) => <li><a href={r.url} rel="me">{r.rede}</a></li>)}</ul>
+  </>
+)}
+{pessoais.length > 0 && (
+  <>
+    <h2>{t('contato.pessoais', idioma)}</h2>
+    <ul>{pessoais.map((r) => <li><a href={r.url} rel="me">{r.rede}</a></li>)}</ul>
+  </>
+)}

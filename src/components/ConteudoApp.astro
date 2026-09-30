@@ -1,0 +1,39 @@
+---
+// Conteúdo de cada app, igual no computador e no celular.
+// Fica num <template> e é clonado na janela ou na tela do celular.
+import { t, type Idioma, type Chave } from '../i18n';
+import { temas, rotuloDoTema } from '../lib/temas';
+
+interface Props { id: string; idioma: Idioma }
+const { id, idioma } = Astro.props;
+
+// Créditos dos materiais de terceiros presentes no build (terceiros/creditos.json, fora do git).
+const [creditos] = Object.values(import.meta.glob<Record<Idioma, string[]>>('../../terceiros/creditos.json', { eager: true, import: 'default' }));
+const linhasCreditos = creditos?.[idioma] ?? [];
+---
+<template id={`app-${id}`}>
+  {id === 'aparencia' ? (
+    <div class="aparencia">
+      <fieldset class="grupo">
+        <legend>{t('aparencia.tema', idioma)}</legend>
+        <label><input type="radio" name="tema" value="automatico" data-tema-opcao /> {t('aparencia.automatico', idioma)}</label>
+        {temas.map((tema) => (
+          <label><input type="radio" name="tema" value={tema.nome} data-tema-opcao /> {rotuloDoTema(tema, idioma)}</label>
+        ))}
+      </fieldset>
+      <fieldset class="grupo">
+        <legend>{t('aparencia.amostra', idioma)}</legend>
+        <p class="leitura">{t('aparencia.amostra.leitura', idioma)}</p>
+        <pre class="codigo"><code>{t('aparencia.amostra.codigo', idioma)}</code></pre>
+      </fieldset>
+      {linhasCreditos.length > 0 && (
+        <fieldset class="grupo">
+          <legend>{t('aparencia.creditos', idioma)}</legend>
+          {linhasCreditos.map((linha) => <p class="creditos">{linha}</p>)}
+        </fieldset>
+      )}
+    </div>
+  ) : (
+    <p class="espaco-reservado">{t(`${id}.corpo` as Chave, idioma)}</p>
+  )}
+</template>
