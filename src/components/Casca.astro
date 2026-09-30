@@ -2,7 +2,6 @@
 // Casca do sistema: área de trabalho, barra de tarefas, menu e celular.
 // Entra em todas as páginas e só aparece com JavaScript ligado e sem a preferência "versão simples".
 import Icone from './Icone.astro';
-import ConteudoApp from './ConteudoApp.astro';
 import PainelTestes from './PainelTestes.astro';
 import { apps } from '../lib/apps';
 import { t, rota, type Idioma } from '../i18n';
@@ -19,7 +18,7 @@ const { idioma } = Astro.props;
       <ul class="icones-area">
         {apps.filter((a) => a.atalho).map((app) => (
           <li>
-            <button class="icone-area" data-app={app.id} data-rota={app.secao && rota(idioma, app.secao)} type="button">
+            <button class="icone-area" data-app={app.id} data-rota={rota(idioma, app.secao)} type="button">
               <Icone nome={app.icone} />
               <span class="rotulo">{t(app.titulo, idioma)}</span>
             </button>
@@ -34,13 +33,16 @@ const { idioma } = Astro.props;
         {t('sistema.nome', idioma)}
       </div>
       <ul class="menu-itens">
-        {apps.map((app) => (
-          <li role="none">
-            <button role="menuitem" type="button" data-app={app.id} data-rota={app.secao && rota(idioma, app.secao)} tabindex="-1">
-              <Icone nome={`${app.icone}-16`} />
-              <span>{t(app.titulo, idioma)}</span>
-            </button>
-          </li>
+        {apps.map((app, i) => (
+          <>
+            {i > 0 && app.grupo !== apps[i - 1].grupo && <li role="separator" class="menu-separador"></li>}
+            <li role="none">
+              <button role="menuitem" type="button" data-app={app.id} data-rota={rota(idioma, app.secao)} tabindex="-1">
+                <Icone nome={`${app.icone}-16`} />
+                <span>{t(app.titulo, idioma)}</span>
+              </button>
+            </li>
+          </>
         ))}
       </ul>
     </div>
@@ -70,7 +72,7 @@ const { idioma } = Astro.props;
       <ul class="grade-apps" aria-label={t('celular.apps', idioma)}>
         {apps.map((app) => (
           <li>
-            <button class="app-celular" data-app={app.id} data-rota={app.secao && rota(idioma, app.secao)} type="button">
+            <button class="app-celular" data-app={app.id} data-rota={rota(idioma, app.secao)} type="button">
               <Icone nome={app.icone} />
               <span class="rotulo">{t(app.titulo, idioma)}</span>
             </button>
@@ -107,10 +109,7 @@ const { idioma } = Astro.props;
 </template>
 
 {apps.map((app) => (
-  <>
-    <ConteudoApp id={app.id} idioma={idioma} />
-    <template id={`icone16-${app.id}`}><Icone nome={`${app.icone}-16`} /></template>
-  </>
+  <template id={`icone16-${app.id}`}><Icone nome={`${app.icone}-16`} /></template>
 ))}
 
 <PainelTestes idioma={idioma} />

@@ -1,5 +1,7 @@
 // Comportamento da casca do sistema. TypeScript puro, sem framework.
 
+import { sincronizarTema } from './tema';
+
 const raiz = document.documentElement;
 const sistema = document.querySelector<HTMLElement>('.sistema')!;
 const $ = <T extends Element = HTMLElement>(sel: string, base: ParentNode = document) => base.querySelector<T>(sel)!;
@@ -12,16 +14,6 @@ const CHAVE = 'igorj.';
 const url = new URLSearchParams(location.search);
 const ler = (k: string) => { if (url.has(k)) return url.get(k); try { return localStorage.getItem(CHAVE + k); } catch { return null; } };
 const gravar = (k: string, v: string) => { try { localStorage.setItem(CHAVE + k, v); } catch {} };
-
-// ---------- Tema ----------
-
-function aplicarTema(tema: string) {
-  if (tema === 'automatico') delete raiz.dataset.tema;
-  else raiz.dataset.tema = tema;
-  gravar('tema', tema);
-  $$<HTMLInputElement>('input[data-tema-opcao]').forEach((i) => (i.checked = i.value === tema));
-}
-const temaAtual = () => raiz.dataset.tema ?? 'automatico';
 
 // ---------- Aparelho e escala ----------
 
@@ -80,20 +72,6 @@ const janelas = new Map<string, { janela: HTMLElement; tarefa: HTMLButtonElement
 let proximoZ = 1;
 let cascata = 0;
 
-function tituloDoApp(id: string) {
-  return $(`.icone-area[data-app="${id}"] .rotulo, .menu-itens [data-app="${id}"] span`).textContent ?? id;
-}
-
-function clonarConteudo(id: string) {
-  const modelo = document.getElementById(`app-${id}`) as HTMLTemplateElement;
-  const conteudo = modelo.content.cloneNode(true) as DocumentFragment;
-  $$<HTMLInputElement>('input[data-tema-opcao]', conteudo).forEach((i) => {
-    i.name = `tema-${id}-${Math.random().toString(36).slice(2, 7)}`;
-    i.checked = i.value === temaAtual();
-  });
-  return conteudo;
-}
-
 function ativar(janela: HTMLElement) {
   $$('.janela.ativa').forEach((j) => j.classList.remove('ativa'));
   janela.classList.add('ativa');
@@ -103,22 +81,21 @@ function ativar(janela: HTMLElement) {
 
 type Pronto = { titulo: string; conteudo: Node; rota: string; icone: string };
 
-function abrir(id: string, pronto?: Pronto) {
+function abrir(id: string, pronto: Pronto) {
   const existente = janelas.get(id);
   if (existente) { restaurar(id); return; }
 
   const modelo = document.getElementById('modelo-janela') as HTMLTemplateElement;
   const janela = (modelo.content.cloneNode(true) as DocumentFragment).firstElementChild as HTMLElement;
-  const titulo = pronto?.titulo ?? tituloDoApp(id);
-  const icone = pronto?.icone ?? id;
+  const { titulo, icone } = pronto;
   const idTitulo = `janela-${id.replace(/[^\w-]/g, '_')}-titulo`;
   janela.dataset.app = id;
-  if (pronto) janela.dataset.rota = pronto.rota;
+  janela.dataset.rota = pronto.rota;
   janela.setAttribute('aria-labelledby', idTitulo);
   $('.titulo-texto', janela).id = idTitulo;
   $('.titulo-texto', janela).textContent = titulo;
   $('.titulo-icone', janela).append((document.getElementById(`icone16-${icone}`) as HTMLTemplateElement).content.cloneNode(true));
-  $('.corpo', janela).append(pronto?.conteudo ?? clonarConteudo(id));
+  $('.corpo', janela).append(pronto.conteudo);
 
   const salva = lerPosicao(id);
   if (salva) {
@@ -372,11 +349,11 @@ const inicio = () => sistema.dataset.inicio ?? '/';
 const pilha: string[] = [];
 let indiceAtual = 0;
 
-// Seção da rota -> ícone do app correspondente; sem app, ícone de documento.
+// Rota -> app da seção mais específica que a contém (o ícone da janela vem dele).
 function iconeDaRota(rota: string) {
-  const botoes = $$<HTMLElement>('.icone-area[data-rota]');
-  const dono = botoes.find((b) => rota.startsWith(b.dataset.rota!));
-  return dono?.dataset.app ?? 'curriculo';
+  const donos = $$<HTMLElement>('.menu-itens [data-rota]').filter((b) => rota.startsWith(b.dataset.rota!));
+  donos.sort((a, b) => b.dataset.rota!.length - a.dataset.rota!.length);
+  return donos[0]?.dataset.app ?? 'blog';
 }
 
 function embrulhar(conteudo: Element) {
@@ -396,6 +373,7 @@ function tituloDaPagina(doc: Document) {
 function mostrarRota(rota: string, titulo: string, conteudo: Node) {
   if (sistema.dataset.modo === 'celular') mostrarNoCelular(titulo, conteudo, rota);
   else abrir(`rota:${rota}`, { titulo, conteudo, rota, icone: iconeDaRota(rota) });
+  sincronizarTema();
 }
 
 async function carregarRota(rota: string) {
@@ -424,10 +402,7 @@ async function navegar(href: string) {
 }
 
 function abrirBotao(botao: HTMLElement) {
-  if (botao.dataset.rota) navegar(botao.dataset.rota);
-  else if (sistema.dataset.modo === 'celular') {
-    mostrarNoCelular(botao.querySelector('.rotulo, span')?.textContent ?? '', clonarConteudo(botao.dataset.app!));
-  } else abrir(botao.dataset.app!);
+  navegar(botao.dataset.rota!);
 }
 
 function ligarRotas() {
@@ -507,11 +482,6 @@ export function iniciar() {
   telaPequena.addEventListener('change', aplicarModo);
   vigiarDensidade();
 
-  document.addEventListener('change', (e) => {
-    const alvo = e.target as HTMLInputElement;
-    if (alvo.matches('input[data-tema-opcao]')) aplicarTema(alvo.value);
-  });
-
   atualizarRelogios();
   setInterval(atualizarRelogios, 15_000);
 
@@ -527,7 +497,7 @@ export function iniciar() {
 
   const abrirUrl = url.get('abrir');
   if (abrirUrl) {
-    const seletor = sistema.dataset.modo === 'celular' ? '.app-celular' : '.icone-area';
+    const seletor = sistema.dataset.modo === 'celular' ? '.app-celular' : '.menu-itens [role="menuitem"]';
     const botao = document.querySelector<HTMLElement>(`${seletor}[data-app="${abrirUrl}"]`);
     if (botao) abrirBotao(botao);
   }

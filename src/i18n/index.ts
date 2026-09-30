@@ -21,6 +21,7 @@ export const secoes = {
   blog: { pt: 'blog', en: 'blog' },
   cv: { pt: 'cv', en: 'cv' },
   contato: { pt: 'contato', en: 'contact' },
+  aparencia: { pt: 'aparencia', en: 'appearance' },
   sistema: { pt: 'sistema', en: 'system' },
 } as const;
 

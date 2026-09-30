@@ -14,13 +14,6 @@
   "celular.bateria": "Battery",
   "celular.status": "Status bar",
   "celular.apps": "Apps",
-  "app.projetos": "Projects",
-  "app.curriculo": "Résumé",
-  "app.contato": "Contact",
-  "app.aparencia": "Appearance",
-  "projetos.corpo": "[INSERIR: project list, from the content repository]",
-  "curriculo.corpo": "[INSERIR: résumé, generated from the YAML in the content repository]",
-  "contato.corpo": "[INSERIR: contact card, from the content repository]",
   "aparencia.tema": "Theme",
   "aparencia.automatico": "Automatic (follows the system)",
   "aparencia.padrao": "Default",
@@ -89,5 +82,7 @@
   "sistema.branch": "Branch",
   "sistema.build": "Build",
   "sistema.desconhecido": "unknown",
-  "sistema.pipeline": "[INSERIR: build and deploy pipeline summary]"
+  "sistema.pipeline": "[INSERIR: build and deploy pipeline summary]",
+  "secao.aparencia": "Appearance",
+  "aparencia.sem-js": "Without JavaScript, the theme follows your system preference."
 }

@@ -1,0 +1,9 @@
+---
+import Aparencia from '../Aparencia.astro';
+import { t, type Idioma } from '../../i18n';
+
+interface Props { idioma: Idioma }
+const { idioma } = Astro.props;
+---
+<h1>{t('secao.aparencia', idioma)}</h1>
+<Aparencia idioma={idioma} />

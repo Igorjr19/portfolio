@@ -108,6 +108,7 @@ body.arrastando, body.arrastando * { user-select: none; cursor: default; }
   display: flex; align-items: center; gap: calc(4 * var(--px)); width: 100%;
   padding: calc(3 * var(--px)); background: none; border: 0; text-align: left; cursor: default;
 }
+.menu-separador { height: var(--px); margin: calc(3 * var(--px)) calc(2 * var(--px)); background: var(--relevo-escuro); box-shadow: 0 var(--px) 0 var(--relevo-claro); }
 .menu-itens button:hover, .menu-itens button:focus-visible { background: var(--destaque); color: var(--destaque-texto); outline: none; }
 
 /* ---------- Celular ---------- */

@@ -8,6 +8,7 @@ import Item from './paginas/Item.astro';
 import Curriculo from './paginas/Curriculo.astro';
 import Contato from './paginas/Contato.astro';
 import Sistema from './paginas/Sistema.astro';
+import AparenciaPagina from './paginas/AparenciaPagina.astro';
 import { t } from '../i18n';
 import { itens } from '../lib/conteudo';
 import { secaoDaColecao, type Pagina, type Colecao } from '../lib/rotas';
@@ -36,6 +37,7 @@ if (pagina.tipo === 'item') {
     pagina.secao === 'cv' ? <Curriculo idioma={idioma} /> :
     pagina.secao === 'contato' ? <Contato idioma={idioma} /> :
     pagina.secao === 'sistema' ? <Sistema idioma={idioma} /> :
+    pagina.secao === 'aparencia' ? <AparenciaPagina idioma={idioma} /> :
     <Lista idioma={idioma} colecao={colecaoDaSecao[pagina.secao]} />
   )}
 </Base>

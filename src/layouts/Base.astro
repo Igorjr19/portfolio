@@ -81,5 +81,9 @@ const itensNav = (Object.keys(secoes) as Secao[]).map((s) => ({ secao: s, href: 
       </footer>
     </div>
     <Casca idioma={idioma} />
+    <script>
+      import { ligarTema } from '../scripts/tema';
+      ligarTema();
+    </script>
   </body>
 </html>
