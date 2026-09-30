@@ -101,20 +101,24 @@ function ativar(janela: HTMLElement) {
   janelas.forEach(({ janela: j, tarefa }) => tarefa.setAttribute('aria-pressed', String(j === janela && !j.hidden)));
 }
 
-function abrir(id: string) {
+type Pronto = { titulo: string; conteudo: Node; rota: string; icone: string };
+
+function abrir(id: string, pronto?: Pronto) {
   const existente = janelas.get(id);
   if (existente) { restaurar(id); return; }
 
   const modelo = document.getElementById('modelo-janela') as HTMLTemplateElement;
   const janela = (modelo.content.cloneNode(true) as DocumentFragment).firstElementChild as HTMLElement;
-  const titulo = tituloDoApp(id);
-  const idTitulo = `janela-${id}-titulo`;
+  const titulo = pronto?.titulo ?? tituloDoApp(id);
+  const icone = pronto?.icone ?? id;
+  const idTitulo = `janela-${id.replace(/[^\w-]/g, '_')}-titulo`;
   janela.dataset.app = id;
+  if (pronto) janela.dataset.rota = pronto.rota;
   janela.setAttribute('aria-labelledby', idTitulo);
   $('.titulo-texto', janela).id = idTitulo;
   $('.titulo-texto', janela).textContent = titulo;
-  $('.titulo-icone', janela).append((document.getElementById(`icone16-${id}`) as HTMLTemplateElement).content.cloneNode(true));
-  $('.corpo', janela).append(clonarConteudo(id));
+  $('.titulo-icone', janela).append((document.getElementById(`icone16-${icone}`) as HTMLTemplateElement).content.cloneNode(true));
+  $('.corpo', janela).append(pronto?.conteudo ?? clonarConteudo(id));
 
   janela.style.left = `calc(${80 + cascata * 12} * var(--px))`;
   janela.style.top = `calc(${12 + cascata * 12} * var(--px))`;
@@ -126,7 +130,7 @@ function abrir(id: string) {
   const tarefa = document.createElement('button');
   tarefa.type = 'button';
   tarefa.className = 'tarefa';
-  tarefa.append((document.getElementById(`icone16-${id}`) as HTMLTemplateElement).content.cloneNode(true));
+  tarefa.append((document.getElementById(`icone16-${icone}`) as HTMLTemplateElement).content.cloneNode(true));
   const rotulo = document.createElement('span');
   rotulo.textContent = titulo;
   tarefa.append(rotulo);
@@ -160,10 +164,13 @@ function minimizar(id: string) {
 
 function fechar(id: string) {
   const { janela, tarefa } = janelas.get(id)!;
+  const rota = janela.dataset.rota;
   janela.remove();
   tarefa.parentElement!.remove();
   janelas.delete(id);
-  $<HTMLButtonElement>(`.icone-area[data-app="${id}"]`).focus();
+  document.querySelector<HTMLButtonElement>(rota ? `.icone-area[data-rota="${rota}"]` : `.icone-area[data-app="${id}"]`)?.focus();
+  // Fechar a janela da rota atual leva a URL de volta ao início.
+  if (rota && rota === location.pathname) history.replaceState({ indice: indiceAtual }, '', inicio());
 }
 
 function ligarJanela(janela: HTMLElement, id: string) {
@@ -213,9 +220,9 @@ function ligarIcones() {
       $$('.icone-area').forEach((b) => b.removeAttribute('aria-selected'));
       botao.setAttribute('aria-selected', 'true');
       // Teclado (detail 0) abre com Enter ou Espaço; mouse abre com duplo clique.
-      if (e.detail === 0) abrir(botao.dataset.app!);
+      if (e.detail === 0) abrirBotao(botao);
     });
-    botao.addEventListener('dblclick', () => abrir(botao.dataset.app!));
+    botao.addEventListener('dblclick', () => abrirBotao(botao));
   });
   $('.area').addEventListener('pointerdown', (e) => {
     if (!(e.target as Element).closest('.icone-area, .janela')) $$('.icone-area').forEach((b) => b.removeAttribute('aria-selected'));
@@ -237,7 +244,7 @@ function ligarMenu() {
 
   botao.addEventListener('click', () => (menu.hidden ? abrirMenu() : fecharMenu()));
   itens.forEach((item, i) => {
-    item.addEventListener('click', () => { fecharMenu(false); abrir(item.dataset.app!); });
+    item.addEventListener('click', () => { fecharMenu(false); abrirBotao(item); });
     item.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowDown') { e.preventDefault(); itens[(i + 1) % itens.length].focus(); }
       if (e.key === 'ArrowUp') { e.preventDefault(); itens[(i - 1 + itens.length) % itens.length].focus(); }
@@ -251,34 +258,144 @@ function ligarMenu() {
 
 // ---------- Celular ----------
 
-function ligarCelular() {
-  const grade = $('.grade-apps');
+let origemCelular: HTMLElement | null = null;
+
+function mostrarNoCelular(titulo: string, conteudo: Node, rota?: string) {
   const aberto = $('.app-aberto');
-  let origem: HTMLButtonElement | null = null;
+  $('.app-aberto-titulo').textContent = titulo;
+  $('.app-aberto-corpo').replaceChildren(conteudo);
+  aberto.dataset.rota = rota ?? '';
+  $('.grade-apps').hidden = true;
+  aberto.hidden = false;
+  $('.app-aberto-titulo').setAttribute('tabindex', '-1');
+  $('.app-aberto-titulo').focus();
+}
 
-  const abrirApp = (botao: HTMLButtonElement) => {
-    origem = botao;
-    const id = botao.dataset.app!;
-    $('.app-aberto-titulo').textContent = $('.rotulo', botao).textContent;
-    const corpo = $('.app-aberto-corpo');
-    corpo.replaceChildren(clonarConteudo(id));
-    grade.hidden = true;
-    aberto.hidden = false;
-    $('.app-aberto-titulo').setAttribute('tabindex', '-1');
-    $('.app-aberto-titulo').focus();
-  };
-  const voltarAoInicio = () => {
-    if (aberto.hidden) return;
-    aberto.hidden = true;
-    grade.hidden = false;
-    origem?.focus();
-  };
+function voltarAoInicioCelular() {
+  const aberto = $('.app-aberto');
+  if (aberto.hidden) return;
+  aberto.hidden = true;
+  aberto.dataset.rota = '';
+  $('.grade-apps').hidden = false;
+  origemCelular?.focus();
+}
 
-  $$<HTMLButtonElement>('.app-celular').forEach((b) => b.addEventListener('click', () => abrirApp(b)));
-  $('.nav-voltar').addEventListener('click', voltarAoInicio);
-  $('.nav-inicio').addEventListener('click', voltarAoInicio);
+function ligarCelular() {
+  $$<HTMLButtonElement>('.app-celular').forEach((b) => b.addEventListener('click', () => {
+    origemCelular = b;
+    abrirBotao(b);
+  }));
+  // Voltar: se a tela aberta é uma rota que entrou no histórico, volta pelo navegador.
+  $('.nav-voltar').addEventListener('click', () => (indiceAtual > 0 ? history.back() : fecharRotaCelular()));
+  $('.nav-inicio').addEventListener('click', fecharRotaCelular);
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && sistema.dataset.modo === 'celular') voltarAoInicio();
+    if (e.key === 'Escape' && sistema.dataset.modo === 'celular') fecharRotaCelular();
+  });
+}
+
+function fecharRotaCelular() {
+  const rota = $('.app-aberto').dataset.rota;
+  voltarAoInicioCelular();
+  if (rota && rota === location.pathname) history.replaceState({ indice: indiceAtual }, '', inicio());
+}
+
+// ---------- Rotas (URL própria para cada janela; voltar do navegador fecha) ----------
+
+const inicio = () => sistema.dataset.inicio ?? '/';
+const pilha: string[] = [];
+let indiceAtual = 0;
+
+// Seção da rota -> ícone do app correspondente; sem app, ícone de documento.
+function iconeDaRota(rota: string) {
+  const botoes = $$<HTMLElement>('.icone-area[data-rota]');
+  const dono = botoes.find((b) => rota.startsWith(b.dataset.rota!));
+  return dono?.dataset.app ?? 'curriculo';
+}
+
+function embrulhar(conteudo: Element) {
+  const pagina = document.createElement('div');
+  pagina.className = 'pagina pagina-na-janela';
+  const interno = document.createElement('div');
+  interno.className = 'pagina-conteudo';
+  interno.append(...conteudo.childNodes);
+  pagina.append(interno);
+  return pagina;
+}
+
+function tituloDaPagina(doc: Document) {
+  return doc.querySelector('#conteudo h1')?.textContent?.trim() || doc.title.split(' · ')[0];
+}
+
+function mostrarRota(rota: string, titulo: string, conteudo: Node) {
+  if (sistema.dataset.modo === 'celular') mostrarNoCelular(titulo, conteudo, rota);
+  else abrir(`rota:${rota}`, { titulo, conteudo, rota, icone: iconeDaRota(rota) });
+}
+
+async function carregarRota(rota: string) {
+  const id = `rota:${rota}`;
+  if (sistema.dataset.modo === 'computador' && janelas.has(id)) { restaurar(id); return; }
+  const resposta = await fetch(rota);
+  if (!resposta.ok) { location.href = rota; return; }
+  const doc = new DOMParser().parseFromString(await resposta.text(), 'text/html');
+  const conteudo = doc.querySelector('#conteudo');
+  if (!conteudo) { location.href = rota; return; }
+  mostrarRota(rota, tituloDaPagina(doc), embrulhar(conteudo));
+}
+
+async function navegar(href: string) {
+  const destino = new URL(href, location.href);
+  if (destino.origin !== location.origin) { location.href = href; return; }
+  const rota = destino.pathname;
+  if (rota === inicio()) return;
+  if (rota !== location.pathname) {
+    indiceAtual++;
+    pilha.length = indiceAtual;
+    pilha[indiceAtual] = rota;
+    history.pushState({ indice: indiceAtual }, '', rota);
+  }
+  await carregarRota(rota);
+}
+
+function abrirBotao(botao: HTMLElement) {
+  if (botao.dataset.rota) navegar(botao.dataset.rota);
+  else if (sistema.dataset.modo === 'celular') {
+    mostrarNoCelular(botao.querySelector('.rotulo, span')?.textContent ?? '', clonarConteudo(botao.dataset.app!));
+  } else abrir(botao.dataset.app!);
+}
+
+function ligarRotas() {
+  pilha[0] = location.pathname;
+  history.replaceState({ indice: 0 }, '', location.pathname + location.search);
+
+  // Rota atual que não é o início: o conteúdo da própria página vai para uma janela.
+  const conteudo = document.querySelector('body > .pagina #conteudo');
+  if (location.pathname !== inicio() && conteudo) {
+    mostrarRota(location.pathname, tituloDaPagina(document), embrulhar(conteudo));
+  }
+
+  // Links internos dentro de janelas e da tela do celular abrem como rota.
+  document.addEventListener('click', (e) => {
+    const link = (e.target as Element).closest?.('.janelas a[href], .app-aberto a[href]') as HTMLAnchorElement | null;
+    if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (link.target && link.target !== '_self') return;
+    const destino = new URL(link.href, location.href);
+    if (destino.origin !== location.origin || /\.[a-z0-9]+$/i.test(destino.pathname) || destino.search.includes('simples')) return;
+    e.preventDefault();
+    navegar(link.href);
+  });
+
+  // Voltar fecha a janela da rota que ficou para trás; avançar reabre.
+  addEventListener('popstate', (e) => {
+    const indice = (e.state?.indice as number | undefined) ?? 0;
+    const rota = location.pathname;
+    if (indice < indiceAtual) {
+      const deixada = pilha[indiceAtual];
+      if (sistema.dataset.modo === 'celular') voltarAoInicioCelular();
+      else if (deixada && deixada !== rota && janelas.has(`rota:${deixada}`)) fechar(`rota:${deixada}`);
+    }
+    indiceAtual = indice;
+    pilha[indice] = rota;
+    if (rota !== inicio()) carregarRota(rota);
   });
 }
 
@@ -336,10 +453,12 @@ export function iniciar() {
   ligarCelular();
   ligarTeclado();
   ligarPainel();
+  ligarRotas();
 
   const abrirUrl = url.get('abrir');
   if (abrirUrl) {
-    if (sistema.dataset.modo === 'celular') $<HTMLButtonElement>(`.app-celular[data-app="${abrirUrl}"]`)?.click();
-    else abrir(abrirUrl);
+    const seletor = sistema.dataset.modo === 'celular' ? '.app-celular' : '.icone-area';
+    const botao = document.querySelector<HTMLElement>(`${seletor}[data-app="${abrirUrl}"]`);
+    if (botao) abrirBotao(botao);
   }
 }

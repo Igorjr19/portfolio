@@ -8,12 +8,12 @@
   --grade: 16;
   --escala: 2;
   --px: calc(var(--escala) * 1px);
-  /* Fontes do sistema. Fontes de terceiros, quando presentes, redefinem estas
-     variáveis em src/estilos-gerados/fontes.css. */
-  --fonte-ui: monospace;
-  --fonte-ui-mono: monospace;
-  --fonte-leitura: sans-serif;
-  --fonte-codigo: monospace;
+  /* Fontes de terceiros, quando presentes, vêm de src/estilos-gerados/fontes.css
+     (variáveis *-terceiros); sem elas, valem as fontes do sistema. */
+  --fonte-ui: var(--fonte-ui-terceiros, monospace);
+  --fonte-ui-mono: var(--fonte-ui-mono-terceiros, monospace);
+  --fonte-leitura: var(--fonte-leitura-terceiros, sans-serif);
+  --fonte-codigo: var(--fonte-codigo-terceiros, monospace);
   --texto-ui: calc(16 * var(--px));
 }
 
@@ -39,8 +39,8 @@ body {
 }
 :root:not([data-casca]) .sistema,
 :root:not([data-casca]) .painel-testes { display: none; }
-/* Por ora a página fica escondida sob a casca; a janela da rota atual vem depois. */
-:root[data-casca] .pagina { display: none; }
+/* Com a casca, o conteúdo da página vai para a janela da rota. */
+:root[data-casca] body > .pagina { display: none; }
 
 button { font: inherit; color: inherit; }
 

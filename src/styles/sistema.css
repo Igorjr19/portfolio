@@ -173,6 +173,16 @@
 .codigo { font-family: var(--fonte-codigo); font-size: 0.875rem; margin: 0; padding: 0.5rem; background: var(--botao-fundo); color: var(--texto); overflow-x: auto; -webkit-font-smoothing: auto; }
 .creditos { margin: 0 0 calc(4 * var(--px)); color: var(--texto-suave); }
 
+/* Página de uma rota dentro de janela ou tela do celular: texto legível, fora da escala de pixel. */
+.pagina-na-janela {
+  font-family: var(--fonte-leitura); font-size: 1rem; line-height: 1.6;
+  -webkit-font-smoothing: auto; font-smooth: auto;
+  user-select: text;
+}
+.pagina-na-janela .pagina-conteudo { max-width: 42rem; margin: 0; padding: 0.25rem 0.5rem 1rem; }
+.janela[data-rota] { width: calc(320 * var(--px)); height: calc(100% - 24 * var(--px)); }
+.app-aberto-corpo .pagina-na-janela { margin: calc(-6 * var(--px)); }
+
 /* ---------- Painel de testes (fora do sistema) ---------- */
 
 .painel-testes {

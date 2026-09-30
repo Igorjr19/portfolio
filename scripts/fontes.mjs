@@ -28,7 +28,7 @@ const faces = presentes.map((f) =>
   `@font-face { font-family: '${f.familia}'; src: url('/fontes/${f.arquivo}') format('truetype'); font-weight: ${f.peso}; font-display: swap; }`);
 const variaveis = Object.entries(manifesto.papeis)
   .filter(([, familia]) => familias.has(familia))
-  .map(([papel, familia]) => `  --fonte-${papel}: '${familia}', ${reserva[papel] ?? 'sans-serif'};`);
+  .map(([papel, familia]) => `  --fonte-${papel}-terceiros: '${familia}', ${reserva[papel] ?? 'sans-serif'};`);
 
 writeFileSync('src/estilos-gerados/fontes.css', `${faces.join('\n')}\n:root {\n${variaveis.join('\n')}\n}\n`);
 console.log(`Fontes: ${presentes.length} arquivo(s) de terceiros.`);

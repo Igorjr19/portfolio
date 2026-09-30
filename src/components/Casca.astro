@@ -5,13 +5,13 @@ import Icone from './Icone.astro';
 import ConteudoApp from './ConteudoApp.astro';
 import PainelTestes from './PainelTestes.astro';
 import { apps } from '../lib/apps';
-import { t, type Idioma } from '../i18n';
+import { t, rota, type Idioma } from '../i18n';
 import '../styles/sistema.css';
 
 interface Props { idioma: Idioma }
 const { idioma } = Astro.props;
 ---
-<div class="sistema" data-modo="computador">
+<div class="sistema" data-modo="computador" data-inicio={rota(idioma)}>
 
   <!-- Computador -->
   <div class="computador">
@@ -19,7 +19,7 @@ const { idioma } = Astro.props;
       <ul class="icones-area">
         {apps.filter((a) => a.atalho).map((app) => (
           <li>
-            <button class="icone-area" data-app={app.id} type="button">
+            <button class="icone-area" data-app={app.id} data-rota={app.secao && rota(idioma, app.secao)} type="button">
               <Icone nome={app.icone} />
               <span class="rotulo">{t(app.titulo, idioma)}</span>
             </button>
@@ -36,7 +36,7 @@ const { idioma } = Astro.props;
       <ul class="menu-itens">
         {apps.map((app) => (
           <li role="none">
-            <button role="menuitem" type="button" data-app={app.id} tabindex="-1">
+            <button role="menuitem" type="button" data-app={app.id} data-rota={app.secao && rota(idioma, app.secao)} tabindex="-1">
               <Icone nome={`${app.icone}-16`} />
               <span>{t(app.titulo, idioma)}</span>
             </button>
@@ -70,7 +70,7 @@ const { idioma } = Astro.props;
       <ul class="grade-apps" aria-label={t('celular.apps', idioma)}>
         {apps.map((app) => (
           <li>
-            <button class="app-celular" data-app={app.id} type="button">
+            <button class="app-celular" data-app={app.id} data-rota={app.secao && rota(idioma, app.secao)} type="button">
               <Icone nome={app.icone} />
               <span class="rotulo">{t(app.titulo, idioma)}</span>
             </button>
