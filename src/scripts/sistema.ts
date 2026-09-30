@@ -120,11 +120,19 @@ function abrir(id: string, pronto?: Pronto) {
   $('.titulo-icone', janela).append((document.getElementById(`icone16-${icone}`) as HTMLTemplateElement).content.cloneNode(true));
   $('.corpo', janela).append(pronto?.conteudo ?? clonarConteudo(id));
 
-  janela.style.left = `calc(${80 + cascata * 12} * var(--px))`;
-  janela.style.top = `calc(${12 + cascata * 12} * var(--px))`;
-  cascata = (cascata + 1) % 6;
+  const salva = lerPosicao(id);
+  if (salva) {
+    janela.style.left = `${salva.x}px`;
+    janela.style.top = `${salva.y}px`;
+    if (salva.max) janela.classList.add('maximizada');
+  } else {
+    janela.style.left = `calc(${80 + cascata * 12} * var(--px))`;
+    janela.style.top = `calc(${12 + cascata * 12} * var(--px))`;
+    cascata = (cascata + 1) % 6;
+  }
 
   $('.janelas').append(janela);
+  if (salva) manterDentro(janela);
 
   const li = document.createElement('li');
   const tarefa = document.createElement('button');
@@ -173,6 +181,36 @@ function fechar(id: string) {
   if (rota && rota === location.pathname) history.replaceState({ indice: indiceAtual }, '', inicio());
 }
 
+// Tamanho atual de um pixel de arte, em pixels CSS: a borda da janela tem exatamente um.
+function pixelDeArte(janela: HTMLElement) {
+  return parseFloat(getComputedStyle(janela).borderTopWidth) || 2;
+}
+
+// A barra de título fica sempre alcançável dentro da área de trabalho.
+function posicionar(janela: HTMLElement, x: number, y: number) {
+  const area = $('.area');
+  const titulo = $('.titulo', janela);
+  const sobra = 48;
+  const maxX = area.clientWidth - sobra;
+  const minX = sobra - janela.offsetWidth;
+  const maxY = area.clientHeight - titulo.offsetHeight;
+  janela.style.left = `${Math.round(Math.min(Math.max(x, minX), maxX))}px`;
+  janela.style.top = `${Math.round(Math.min(Math.max(y, 0), Math.max(0, maxY)))}px`;
+}
+
+function manterDentro(janela: HTMLElement) {
+  if (!janela.classList.contains('maximizada')) posicionar(janela, janela.offsetLeft, janela.offsetTop);
+}
+
+// Posição de cada janela, salva no navegador (conveniência; falha sem problema).
+type Posicao = { x: number; y: number; max: boolean };
+function lerPosicao(id: string): Posicao | null {
+  try { return JSON.parse(localStorage.getItem(`${CHAVE}janela.${id}`) ?? 'null'); } catch { return null; }
+}
+function salvarPosicao(id: string, janela: HTMLElement) {
+  gravar(`janela.${id}`, JSON.stringify({ x: janela.offsetLeft, y: janela.offsetTop, max: janela.classList.contains('maximizada') }));
+}
+
 function ligarJanela(janela: HTMLElement, id: string) {
   janela.addEventListener('pointerdown', () => ativar(janela));
   janela.addEventListener('focusin', () => ativar(janela));
@@ -185,26 +223,55 @@ function ligarJanela(janela: HTMLElement, id: string) {
       else {
         const max = janela.classList.toggle('maximizada');
         botao.setAttribute('aria-label', max ? botao.dataset.restaurar! : botao.dataset.maximizar!);
+        salvarPosicao(id, janela);
       }
     });
   });
+  const botaoMax = $<HTMLButtonElement>('[data-acao="maximizar"]', janela);
+  if (janela.classList.contains('maximizada')) botaoMax.setAttribute('aria-label', botaoMax.dataset.restaurar!);
 
   // Arrastar pela barra de título.
   const titulo = $('.titulo', janela);
   titulo.addEventListener('pointerdown', (e) => {
-    if ((e.target as Element).closest('.controle') || janela.classList.contains('maximizada')) return;
-    const area = $('.area').getBoundingClientRect();
+    if (e.button !== 0 || (e.target as Element).closest('.controle') || janela.classList.contains('maximizada')) return;
+    e.preventDefault();
+    ativar(janela);
     const inicioX = e.clientX - janela.offsetLeft;
     const inicioY = e.clientY - janela.offsetTop;
+    let pendente: { x: number; y: number } | null = null;
+    let quadro = 0;
     titulo.setPointerCapture(e.pointerId);
+    document.body.classList.add('arrastando');
+
     const mover = (ev: PointerEvent) => {
-      const x = Math.min(Math.max(ev.clientX - inicioX, -janela.offsetWidth + 40), area.width - 40);
-      const y = Math.min(Math.max(ev.clientY - inicioY, 0), area.height - titulo.offsetHeight);
-      janela.style.left = `${x}px`;
-      janela.style.top = `${y}px`;
+      pendente = { x: ev.clientX - inicioX, y: ev.clientY - inicioY };
+      if (!quadro) quadro = requestAnimationFrame(() => {
+        quadro = 0;
+        if (pendente) posicionar(janela, pendente.x, pendente.y);
+      });
+    };
+    const soltar = () => {
+      titulo.removeEventListener('pointermove', mover);
+      titulo.removeEventListener('lostpointercapture', soltar);
+      document.body.classList.remove('arrastando');
+      if (quadro) cancelAnimationFrame(quadro);
+      if (pendente) posicionar(janela, pendente.x, pendente.y);
+      salvarPosicao(id, janela);
     };
     titulo.addEventListener('pointermove', mover);
-    titulo.addEventListener('pointerup', () => titulo.removeEventListener('pointermove', mover), { once: true });
+    // lostpointercapture chega depois de pointerup e de pointercancel.
+    titulo.addEventListener('lostpointercapture', soltar);
+  });
+
+  // Teclado: Alt + setas move a janela focada.
+  janela.addEventListener('keydown', (e) => {
+    if (!e.altKey || janela.classList.contains('maximizada')) return;
+    const passo = 8 * pixelDeArte(janela);
+    const d: Record<string, [number, number]> = { ArrowLeft: [-passo, 0], ArrowRight: [passo, 0], ArrowUp: [0, -passo], ArrowDown: [0, passo] };
+    if (!d[e.key]) return;
+    e.preventDefault();
+    posicionar(janela, janela.offsetLeft + d[e.key][0], janela.offsetTop + d[e.key][1]);
+    salvarPosicao(id, janela);
   });
 
   titulo.addEventListener('dblclick', (e) => {
@@ -454,6 +521,9 @@ export function iniciar() {
   ligarTeclado();
   ligarPainel();
   ligarRotas();
+
+  // Tela menor: traz as janelas de volta para dentro.
+  addEventListener('resize', () => janelas.forEach(({ janela }) => manterDentro(janela)));
 
   const abrirUrl = url.get('abrir');
   if (abrirUrl) {

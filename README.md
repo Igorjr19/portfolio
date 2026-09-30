@@ -14,6 +14,7 @@ npm run dev            # gera os ícones e abre em http://localhost:4321
 npm run build          # build de produção, com as verificações
 npm run build:exemplo  # build aceitando conteúdo de exemplo (prévias)
 npm run contraste      # auditoria de contraste dos temas
+npm run check          # checagem de tipos
 ```
 
 O conteúdo vem da pasta indicada em `CONTEUDO_DIR` (padrão: `./conteudo`, uma cópia local do repositório de conteúdo, que é privado). No build do Cloudflare, `CONTEUDO_REPO` e `CONTEUDO_TOKEN` fazem o build baixar esse repositório antes de começar. O build de produção falha se encontrar conteúdo de exemplo (`exemplo: true` ou `[EXEMPLO]`), contraste abaixo do mínimo ou token faltando num tema. Para prévias com conteúdo de exemplo, defina `PERMITIR_EXEMPLO=1`.

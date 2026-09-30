@@ -38,6 +38,8 @@
 .janela[hidden] { display: none; }
 .janela.maximizada { inset: 0 !important; width: auto; max-width: none; max-height: none; }
 .janela:focus { outline: none; }
+.janela .corpo { user-select: text; cursor: auto; }
+body.arrastando, body.arrastando * { user-select: none; cursor: default; }
 
 .titulo {
   display: flex; align-items: center; gap: calc(3 * var(--px));
