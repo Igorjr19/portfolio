@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main, tui]
+  pull_request:
+  workflow_dispatch:
+  # Sent by the content repository after it changes or refreshes external data.
+  repository_dispatch:
+    types: [content-updated]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, types and unit tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
+      - run: deno task install
+      - run: deno task lint
+      - run: deno task typecheck
+      - run: deno task test
+
+  e2e:
+    name: End-to-end tests
+    needs: quality
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .cache
+          key: cache-${{ hashFiles('tests/e2e/support/browser.ts', 'data/themes/*.toml') }}
+      - run: deno task test:e2e
+
+  deploy:
+    name: Deploy to Cloudflare Pages
+    needs: [quality, e2e]
+    # Skipped until the Cloudflare project variable exists, so pushes stay green before deployment is configured.
+    if: github.event_name != 'pull_request' && vars.CLOUDFLARE_PAGES_PROJECT != ''
+    runs-on: ubuntu-24.04
+    environment: ${{ github.ref_name == 'main' && 'production' || 'preview' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
+      - run: deno task build
+        env:
+          CONTENT_REPO: ${{ vars.CONTENT_REPO }}
+          CONTENT_TOKEN: ${{ secrets.CONTENT_TOKEN }}
+          ALLOW_EXAMPLE_CONTENT: ${{ vars.ALLOW_EXAMPLE_CONTENT }}
+      - uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=${{ vars.CLOUDFLARE_PAGES_PROJECT }} --branch=${{ github.ref_name }}

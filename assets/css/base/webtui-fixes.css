@@ -1,0 +1,19 @@
+/* Undo WebTUI 0.1.10 base rules that hurt accessibility or reading. */
+@layer app.base {
+  /* WebTUI sets `* { outline: none }`. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  body {
+    word-break: normal;
+    overflow-wrap: break-word;
+    font-variant-ligatures: none;
+  }
+
+  /* Keeps the drawn marker but hides it from screen readers. */
+  ul li::before {
+    content: '- ' / '';
+  }
+}

@@ -1,0 +1,32 @@
+@layer app.layout {
+  body {
+    container: screen / inline-size;
+  }
+
+  .grid {
+    --grid-columns: 1;
+    display: grid;
+    gap: var(--cell-height) var(--cell-width);
+    grid-template-columns: repeat(
+        var(--grid-columns),
+        round(
+          down,
+          calc((100cqi - (var(--grid-columns) - 1) * var(--cell-width)) / var(--grid-columns)),
+          var(--cell-width)
+        )
+      );
+  }
+
+  @supports not (width: round(down, 1px, 1px)) {
+    .grid {
+      grid-template-columns: repeat(var(--grid-columns), 1fr);
+    }
+  }
+
+  /* In a container query, ch is measured with the container font (Fira Code), not the browser default. */
+  @container screen (width >= 80ch) {
+    .grid {
+      --grid-columns: 2;
+    }
+  }
+}

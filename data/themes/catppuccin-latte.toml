@@ -1,0 +1,25 @@
+name = "Catppuccin Latte"
+family = "catppuccin"
+variant = "light"
+
+[credit]
+author = "Catppuccin"
+license = "MIT"
+url = "https://catppuccin.com"
+
+[palette]
+url = "https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/5a44b4f0a21646be296e408338ff7dc1a09ff9a8/windowsterminal/Catppuccin%20Latte.json"
+sha256 = "9d044d2310f1a3a2d20d925e71905f2a785c3ca2f6f8bc38d79d4fd8f75235aa"
+
+# Latte accents are below 4.5:1 as text on its light background;
+# only foreground, white and red pass, so the other text roles fall back to the text color.
+[roles]
+text-muted = "white"
+link = "@text"
+success = "@text"
+warning = "@text"
+cursor = "@text"
+syntax-keyword = "@text"
+syntax-string = "@text"
+syntax-number = "@text"
+syntax-function = "@text"

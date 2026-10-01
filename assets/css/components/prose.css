@@ -1,0 +1,20 @@
+@layer app.components {
+  /* WebTUI reads the font from --font-family, so overriding it here switches every text element. */
+  .prose {
+    --font-family: var(--font-text);
+    font-family: var(--font-text);
+  }
+
+  .prose > * + * {
+    margin-block-start: 0.75lh;
+  }
+
+  .prose :is(code, pre, kbd, samp) {
+    --font-family: var(--font-mono);
+    font-family: var(--font-mono);
+  }
+
+  .prose pre code {
+    font-variant-ligatures: common-ligatures;
+  }
+}

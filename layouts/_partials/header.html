@@ -1,0 +1,10 @@
+<header>
+  <p><a href="{{ site.Home.RelPermalink }}">{{ site.Title }}</a></p>
+  {{- with .Translations }}
+  <nav aria-label="{{ i18n "languages" }}">
+    {{- range . }}
+    <a href="{{ .RelPermalink }}" hreflang="{{ .Language.Locale }}" lang="{{ .Language.Locale }}">{{ .Language.Label }}</a>
+    {{- end }}
+  </nav>
+  {{- end }}
+</header>

@@ -1,0 +1,31 @@
+{
+  "tasks": {
+    "install": "deno install --frozen",
+    "content:fetch": "deno run --allow-read=content --allow-env=CONTENT_REPO,CONTENT_TOKEN,CONTENT_REF --allow-run=git tools/cli/fetch-content.ts",
+    "content:check": "deno run --allow-read=content --allow-env=ALLOW_EXAMPLE_CONTENT tools/cli/check-content.ts",
+    "fonts": "deno run --allow-read --allow-write=generated tools/cli/build-fonts.ts",
+    "themes": "deno run --allow-read --allow-write=generated,.cache --allow-net=raw.githubusercontent.com tools/cli/build-themes.ts",
+    "prepare": "deno task install && deno task fonts && deno task themes",
+    "dev": "deno task content:fetch && deno task prepare && hugo server",
+    "build": "deno task content:fetch && deno task content:check && deno task prepare && hugo build --minify --cleanDestinationDir",
+    "build:fixtures": "deno task prepare && hugo build --minify --cleanDestinationDir --config hugo.toml,tests/fixtures/hugo.toml",
+    "lint": "biome ci . && actionlint",
+    "format": "biome check --write .",
+    "typecheck": "deno check tools tests assets/ts",
+    "test": "deno test --allow-read tests/unit",
+    "test:e2e": "deno task build:fixtures && deno test --allow-read --allow-write --allow-net --allow-env --allow-run tests/e2e",
+    "ci": "deno task lint && deno task typecheck && deno task test && deno task test:e2e",
+    "hooks": "lefthook install"
+  },
+  "imports": {
+    "@astral/astral": "jsr:@astral/astral@0.5.6",
+    "@fontsource/fira-code": "npm:@fontsource/fira-code@5.3.0",
+    "@fontsource/fira-sans": "npm:@fontsource/fira-sans@5.3.0",
+    "@std/assert": "jsr:@std/assert@1.0.19",
+    "@std/http": "jsr:@std/http@1.1.4",
+    "@std/toml": "jsr:@std/toml@1.0.11",
+    "@valibot/valibot": "jsr:@valibot/valibot@1.5.0",
+    "@webtui/css": "npm:@webtui/css@0.1.10"
+  },
+  "nodeModulesDir": "auto"
+}

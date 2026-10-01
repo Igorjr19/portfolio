@@ -1,0 +1,25 @@
+/*
+ * Registered as <length>, the cell size computes to pixels on :root and is inherited as pixels.
+ * Without the registration, descendants would inherit "1ch" and resolve it against their own font.
+ */
+@property --cell-width {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --cell-height {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+@layer app.tokens {
+  :root {
+    --font-mono: 'Fira Code', ui-monospace, monospace;
+    --font-text: 'Fira Sans', system-ui, sans-serif;
+    --font-family: var(--font-mono);
+    --cell-width: 1ch;
+    --cell-height: 1lh;
+  }
+}

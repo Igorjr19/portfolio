@@ -1,0 +1,48 @@
+baseURL = "https://igorj.dev/"
+title = "Ígor José Rodrigues — Developer"
+
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = true
+
+enableRobotsTXT = true
+
+[markup.highlight]
+  # Code colors come from the theme roles instead of inline styles.
+  noClasses = false
+
+[taxonomies]
+  category = "categories"
+
+[languages.pt]
+  locale = "pt-BR"
+  label = "Português"
+  weight = 1
+
+[languages.en]
+  locale = "en"
+  label = "English"
+  weight = 2
+
+# Defining any mount replaces Hugo's defaults for that target, so every source is listed.
+# tests/fixtures/hugo.toml mirrors this list with the fixture content.
+[module]
+  [[module.mounts]]
+    source = "content"
+    target = "content"
+    files = ["**/*.md", "**/*.png", "**/*.jpg", "**/*.webp", "**/*.svg", "! README.md"]
+  [[module.mounts]]
+    source = "content"
+    target = "data"
+    files = ["**/*.yaml"]
+  [[module.mounts]]
+    source = "data"
+    target = "data"
+  [[module.mounts]]
+    source = "assets"
+    target = "assets"
+  [[module.mounts]]
+    source = "generated/css"
+    target = "assets/css/generated"
+  [[module.mounts]]
+    source = "generated/fonts"
+    target = "static/fonts"

@@ -1,0 +1,12 @@
+name = "Catppuccin Mocha"
+family = "catppuccin"
+variant = "dark"
+
+[credit]
+author = "Catppuccin"
+license = "MIT"
+url = "https://catppuccin.com"
+
+[palette]
+url = "https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/5a44b4f0a21646be296e408338ff7dc1a09ff9a8/windowsterminal/Catppuccin%20Mocha.json"
+sha256 = "b5e3d8794b9a14bc632f39f63b84a649b65a379fa3d29dbc6efe2a571b864c16"

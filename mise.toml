@@ -1,0 +1,6 @@
+[tools]
+hugo = "0.167.0"
+deno = "2.9.7"
+biome = "2.5.14"
+lefthook = "2.1.15"
+actionlint = "1.7.12"

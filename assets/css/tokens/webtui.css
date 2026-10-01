@@ -1,0 +1,11 @@
+@layer app.tokens {
+  :root {
+    --background0: var(--color-background);
+    --background1: var(--color-surface-1);
+    --background2: var(--color-surface-2);
+    --background3: var(--color-surface-3);
+    --foreground0: var(--color-text);
+    --foreground1: var(--color-text);
+    --foreground2: var(--color-text-muted);
+  }
+}

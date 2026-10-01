@@ -1,0 +1,17 @@
+# Same mounts as hugo.toml, reading the fixture content instead of the private content repository.
+[module]
+  [[module.mounts]]
+    source = "tests/fixtures/content"
+    target = "content"
+  [[module.mounts]]
+    source = "data"
+    target = "data"
+  [[module.mounts]]
+    source = "assets"
+    target = "assets"
+  [[module.mounts]]
+    source = "generated/css"
+    target = "assets/css/generated"
+  [[module.mounts]]
+    source = "generated/fonts"
+    target = "static/fonts"

@@ -1,0 +1,26 @@
+@layer app.components {
+  .panel {
+    --box-border-color: var(--color-text-muted);
+    padding: var(--cell-height) var(--cell-width);
+  }
+
+  .panel:focus-within {
+    --box-border-color: var(--color-accent);
+  }
+
+  /* The title sits on the top border row; its background hides the border behind the text. */
+  .panel__title {
+    display: block;
+    width: fit-content;
+    min-height: var(--cell-height);
+    margin-block: calc(-1 * var(--cell-height)) 0;
+    padding-inline: var(--cell-width);
+    background-color: var(--color-background);
+    font-size: inherit;
+    line-height: var(--cell-height);
+  }
+
+  .panel__shortcut {
+    color: var(--color-text-muted);
+  }
+}

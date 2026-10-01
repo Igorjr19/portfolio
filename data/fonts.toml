@@ -1,0 +1,13 @@
+subsets = ["latin", "latin-ext"]
+
+[[families]]
+name = "Fira Code"
+package = "@fontsource/fira-code"
+weights = [400, 700]
+styles = ["normal"]
+
+[[families]]
+name = "Fira Sans"
+package = "@fontsource/fira-sans"
+weights = [400, 700]
+styles = ["normal", "italic"]

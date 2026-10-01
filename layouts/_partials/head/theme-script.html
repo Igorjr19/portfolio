@@ -1,0 +1,3 @@
+{{- with resources.Get "ts/theme/apply-saved-theme.ts" | js.Build (dict "minify" true) }}
+<script>{{ .Content | safeJS }}</script>
+{{- end }}

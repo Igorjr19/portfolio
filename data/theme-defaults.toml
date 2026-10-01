@@ -1,0 +1,23 @@
+# Which palette color fills each interface role. A value is a palette key
+# (terminal scheme names: black ... brightWhite, background, foreground, cursorColor,
+# selectionBackground) or another role prefixed with "@". Themes may override any role.
+
+defaultFamily = "catppuccin"
+
+[roles]
+background = "background"
+text = "foreground"
+text-muted = "brightWhite"
+accent = "blue"
+link = "@accent"
+cursor = "cursorColor"
+success = "green"
+warning = "yellow"
+error = "red"
+selection-background = "@text"
+selection-text = "@background"
+syntax-keyword = "purple"
+syntax-string = "green"
+syntax-number = "yellow"
+syntax-function = "blue"
+syntax-comment = "@text-muted"
